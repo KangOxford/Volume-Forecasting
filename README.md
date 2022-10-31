@@ -1,2 +1,2 @@
 # Volume-Transformer
-Best Bid Volume Time Series Prediction in LOB
+Trading Volume Time Series Prediction in LOB
