@@ -15,4 +15,4 @@ Trading Volume Time Series Prediction in LOB
   * cancellation is important
   * top k(default 3) largest 
   * aggressive buy and sell, buy MO
-  * 
+ * Auto Market Making in pools of the defi 
