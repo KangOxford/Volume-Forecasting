@@ -12,7 +12,12 @@ Trading Volume Time Series Prediction in LOB
   * tick clock
 * The timewindow size: 1m(default), 1s, 10s, 30s [intra day]
 * Feature Engineering
+  * Factors database construction 
   * cancellation is important
   * top k(default 3) largest 
   * aggressive buy and sell, buy MO
- * Auto Market Making in pools of the defi 
+* Auto Market Making in pools of the defi
+* Motivation of the trading volume prediction
+  * Optimal execution: vwap
+  * Cancellation alpha
+* [How and When are High-Frequency Stock Returns Predictable?](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4095405) by Jianqing Fan  
