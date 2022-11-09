@@ -1,5 +1,5 @@
-# Volume-Transformer
-Trading Volume Time Series Prediction in LOB
+# Forecasting-Transformer
+Trading Target(Volume/Volatility) Time Series Prediction in LOB
 
 
 # Timeline:
@@ -25,3 +25,4 @@ Trading Volume Time Series Prediction in LOB
   * Past traded volume
   * Past traded number of orders 
 * [How and When are High-Frequency Stock Returns Predictable?](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4095405) by Jianqing Fan  
+* Create database(SQLite) and webapp based on Flask
