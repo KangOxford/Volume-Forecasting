@@ -1,4 +1,4 @@
-# Forecasting-Transformer
+# Target-Forecasting
 Trading Target(Volume/Volatility) Time Series Prediction in LOB
 
 
