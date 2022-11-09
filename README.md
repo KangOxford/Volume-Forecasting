@@ -4,7 +4,9 @@ Trading Volume Time Series Prediction in LOB
 
 # Timeline:
 ## Week 1 Feature Engineering
-* Cross auction Implemention
+* Simulator Improvement
+  * Cross auction Implemention
+  * Different type of clock in simulator
 * [Time_Series_Transformer](https://huggingface.co/docs/transformers/model_doc/time_series_transformer)
 * Clocks types
   * calender clock
@@ -20,4 +22,6 @@ Trading Volume Time Series Prediction in LOB
 * Motivation of the trading volume prediction
   * Optimal execution: vwap
   * Cancellation alpha
+  * Past traded volume
+  * Past traded number of orders 
 * [How and When are High-Frequency Stock Returns Predictable?](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4095405) by Jianqing Fan  
