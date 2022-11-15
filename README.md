@@ -1,8 +1,14 @@
-# Target-Forecasting
+# Time-Series-Forecasting
 Trading Target(Volume/Volatility) Time Series Prediction in LOB
 
 
 # Timeline:
+
+## Week 2 Feature Engineering
+* Indicators
+  * aggressive buy, buy MO
+  
+
 ## Week 1 Feature Engineering
 * Simulator Improvement
   * Cross auction Implemention
