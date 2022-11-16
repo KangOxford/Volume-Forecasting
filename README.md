@@ -5,6 +5,12 @@ Trading Target(Volume/Volatility) Time Series Prediction in LOB
 # Timeline:
 
 ## Week 2 Feature Engineering
+* Target: percentage change of volume
+* Imbalance:
+  $$\frac{x_{bid} - x_{ask}}{x_{bid}+x_{ask}}$$
+* Lookback window
+  * disjoint lookback window
+  * overlap lookback window
 * Indicators
   * [Implemented Indicators]()
 * Literature
