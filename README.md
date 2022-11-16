@@ -6,7 +6,7 @@ Trading Target(Volume/Volatility) Time Series Prediction in LOB
 
 ## Week 2 Feature Engineering
 * Indicators
-  * Implemented
+  * [Implemented Indicators]()
 * Literature
   * [Order Behavior In High Frequency Markets](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjWh56jmLP7AhXKSsAKHVbGDC8QFnoECA4QAQ&url=https%3A%2F%2Fegrove.olemiss.edu%2Fcgi%2Fviewcontent.cgi%3Farticle%3D1561%26context%3Detd&usg=AOvVaw3f5_VReBN79AwGYPqyOd5C)
   * [Order Exposure in High Frequency Markets](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjWh56jmLP7AhXKSsAKHVbGDC8QFnoECAkQAw&url=http%3A%2F%2Ffaculty.haas.berkeley.edu%2Fhender%2FHidden_AT_HFT.pdf&usg=AOvVaw1SUvGS2w2GWj83ibC4MRSA)
