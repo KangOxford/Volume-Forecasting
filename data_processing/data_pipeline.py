@@ -15,21 +15,40 @@ def get_orderbook_data():
     # df1 = df.iloc[:,[0,2]];df1.columns =['best_ask','best_bid'];df1
     # df2 = pd.merge(message, df1,left_index=True, right_index=True);df2 = df2.reset_index();df2 = df2.drop(['remark'],axis = 1);df2
     pass
+
+def timestamp_format(message):
+    message.time *= 1000000000
+    message.time = message.time.astype("datetime64[ns]")
+    message = message.reset_index()
+    message = message.set_index('time')
+    message = message.drop(['index'],axis = 1)
+    return message
     
+def plot_single_value(value):
+    import matplotlib.pyplot as plt
+    from matplotlib.pyplot import figure
+    figure(figsize=(50, 10), dpi=80)
+    plt.plot(value)
+
+def split_into_bucket(message):
+    groupped_message = message.groupby([[d.hour for d in message.index],[d.minute for d in message.index]])
+    groupped_quantity = message['quantity'].groupby([[d.hour for d in message.index],[d.minute for d in message.index]]).sum()
+    return groupped_message, groupped_quantity
+
 if __name__=="__main__":
     message = get_message_data()
-    def timestamp_format(message):
-        
-        return message
-    message.time.astype("datetime64[s]")
-    # def split_into_bucket(message):
-    # from datetime import datetime
-    # datetime.now()
-    from dateutil.parser import parse
-    parse("34201.238593")
-    pd.to_datetime("34201.238593")
-    message.time *= 1000000000
-    message.time.astype("datetime64[ns]")
+    message = timestamp_format(message)
+    groupped_message, groupped_quantity = split_into_bucket(message)
+    plot_single_value(groupped_quantity.values)
+    
+    
+    # return 
+    # for item in groupped_message:
+    #     print(item)
+    #     break
+    # message.resample('1min')
+
     # def cut_tail(message):
-    # top_quantity = message.quantity.quantile(0.95)
-    # bottom_quantity = message.quantity.quantile(0.05)
+    plot_single_value(message.quantity)
+    top_quantity = message.quantity.quantile(0.95)
+    bottom_quantity = message.quantity.quantile(0.05)
