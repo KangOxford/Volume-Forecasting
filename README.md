@@ -6,11 +6,22 @@ Trading Target(Volume/Volatility) Time Series Prediction in LOB
 
 ## Week 2 Feature Engineering
 * Target: percentage change of volume
-* Imbalance:
-  $$\frac{x_{bid} - x_{ask}}{x_{bid}+x_{ask}}$$
+* Imbalance:<br>
+  $\frac{x_{bid} - x_{ask}}{x_{bid}+x_{ask}}$
 * Lookback window
   * disjoint lookback window
   * overlap lookback window
+  
+$$
+\left\{
+             \begin{array}{lr}
+             (t-1), & 20 features,   \\
+             (t-2) \sim (t-5),&  20 features\\
+             (t-6) \sim (t-20),&  20 features, &  
+             \end{array}
+\right.
+$$
+  
 * Indicators
   * [Implemented Indicators]()
 * Literature
