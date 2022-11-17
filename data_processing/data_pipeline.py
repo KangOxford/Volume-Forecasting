@@ -52,8 +52,8 @@ def get_basic_features(groupped_message):
         bid_item = item[item.side == 1]; ask_item = item[item.side == -1]
         signal[sym + 'bid_num_orders'] = bid_item.shape[0]; signal[sym+'ask_num_orders'] = ask_item.shape[0]
         signal[sym+'bid_volume'] = bid_item.quantity.sum(); signal[sym+'ask_volume'] = ask_item.quantity.sum()        
-        signal[sym+'bid_notianal']=(bid_item.quantity * bid_item.price).sum()/Config.scale_level
-        signal[sym+'ask_notianal']=(ask_item.quantity * ask_item.price).sum()/Config.scale_level
+        signal[sym+'bid_notional']=(bid_item.quantity * bid_item.price).sum()/Config.scale_level
+        signal[sym+'ask_notional']=(ask_item.quantity * ask_item.price).sum()/Config.scale_level
         return signal
     signal_list = []
     for time_index, item in groupped_message:
@@ -96,11 +96,15 @@ def get_data():
     features['volume'] = features.bid_volume + features.ask_volume
     features['vol_change'] = features.volume.diff()/features.volume
     features['vol_direction'] = features.vol_change.apply(lambda x: -1 if x<= 0 else 1)
-    return features    
+    features.timeHM_start = features.timeHM_start.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
+    features.timeHM_end = features.timeHM_end.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
+    features['target'] = features['volume'].shift(-1)
+    
+    return features.dropna(),features   
 
 if __name__=="__main__":
     
-    features = get_data()
+    features, raw_features = get_data()
     
     plot_single_value(features.vol_direction)
     
