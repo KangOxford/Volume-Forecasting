@@ -35,6 +35,13 @@ def split_into_bucket(message):
     groupped_quantity = message['quantity'].groupby([[d.hour for d in message.index],[d.minute for d in message.index]]).sum()
     return groupped_message, groupped_quantity
 
+def cut_tail(groupped_quantity):
+    top_quantity = groupped_quantity.quantile(0.95)
+    btm_quantity = groupped_quantity.quantile(0.05)
+    new = groupped_quantity[groupped_quantity <= top_quantity]
+    new = new[new >= btm_quantity]
+    return new 
+
 if __name__=="__main__":
     message = get_message_data()
     message = timestamp_format(message)
@@ -48,7 +55,7 @@ if __name__=="__main__":
     #     break
     # message.resample('1min')
 
-    # def cut_tail(message):
-    plot_single_value(message.quantity)
-    top_quantity = message.quantity.quantile(0.95)
-    bottom_quantity = message.quantity.quantile(0.05)
+    # new = cut_tail(groupped_quantity)
+    # plot_single_value(new.values)
+    # top_quantity = message.quantity.quantile(0.95)
+    # bottom_quantity = message.quantity.quantile(0.05)
