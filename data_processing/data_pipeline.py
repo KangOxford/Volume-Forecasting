@@ -84,7 +84,7 @@ def get_basic_features(groupped_message):
     features['timeHM_end'] = features.timeHM_start.shift(-1); features.timeHM_end.iloc[-1] = '1600'
     return features
 
-if __name__=="__main__":
+def get_data():
     message = get_message_data()
 
     orderbook_data = get_orderbook_data()
@@ -93,10 +93,16 @@ if __name__=="__main__":
     groupped_message, groupped_quantity = split_into_bucket(merged_message)
     # plot_single_value(groupped_quantity.values)
     features = get_basic_features(groupped_message)
+    features['volume'] = features.bid_volume + features.ask_volume
+    features['vol_change'] = features.volume.diff()/features.volume
+    features['vol_direction'] = features.vol_change.apply(lambda x: -1 if x<= 0 else 1)
+    return features    
+
+if __name__=="__main__":
     
+    features = get_data()
     
-    
-    
+    plot_single_value(features.vol_direction)
     
     
     
