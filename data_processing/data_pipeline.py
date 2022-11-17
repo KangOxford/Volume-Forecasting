@@ -36,6 +36,21 @@ def plot_single_value(value):
     plt.plot(value)
 
 def split_into_bucket(message):
+    
+    msg1 = message.resample('5min') 
+    for item in msg1:
+        print(item)
+        break
+    
+def split_by_resample(message):
+    msg1 = message.resample('5min') 
+    return msg1    
+    
+    
+    
+    
+    
+    
     groupped_message = message.groupby([[d.hour for d in message.index],[d.minute for d in message.index]])
     groupped_quantity = message['quantity'].groupby([[d.hour for d in message.index],[d.minute for d in message.index]]).sum()
     return groupped_message, groupped_quantity
