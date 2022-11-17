@@ -99,14 +99,17 @@ def get_data():
     features.timeHM_start = features.timeHM_start.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
     features.timeHM_end = features.timeHM_end.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
     features['target'] = features['volume'].shift(-1)
-    
     return features.dropna(),features   
 
+def feature_overlap(features):
+    
+    
 if __name__=="__main__":
     
     features, raw_features = get_data()
+    # plot_single_value(features.vol_direction)
+    feature_overlap(features)
     
-    plot_single_value(features.vol_direction)
     
     
     
