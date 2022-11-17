@@ -101,14 +101,14 @@ def get_data():
     features['target'] = features['volume'].shift(-1)
     return features.dropna(),features   
 
-def feature_overlap(features):
+# def feature_overlap(features, window= 5):
     
     
 if __name__=="__main__":
     
     features, raw_features = get_data()
     # plot_single_value(features.vol_direction)
-    feature_overlap(features)
+    # feature_overlap(features)
     
     
     
