@@ -176,17 +176,21 @@ def feature_disjoint(windows= [1,5,10]):
     features5, _ = get_data(level2)
     features10, _ = get_data(level3)
     # ----------------- 01 -----------------
-    features1_new = features1.shift(-level3+1)
+    features1_new = features1.shift(-level3-level2)
     features1_n = features1_new.dropna(axis = 0)
+    features1_n = features1_n.reset_index().drop(['index'],axis =1)
     # ----------------- 01 -----------------
     features5_new = features5.drop(['target'],axis =1)
-    features5_n = features5_new.shift(-(level3-level2))
+    features5_n = features5_new.shift(-level3)
     features5_n = features5_n.dropna(axis = 0)
     # features5_n = features5_new.iloc[:-level1,:]
     features5_n.columns = ["5_"+item for item in features5_n.columns]
+    features5_n = features5_n.shift(level1).dropna()
     # ----------------- 01 -----------------
     features10_n = features10.drop(['target'],axis =1)
     features10_n.columns = ["10_"+item for item in features10_n.columns]
+    features10_n = features10_n.shift(level2+level1).dropna()
+    features10_n = features10_n.reset_index().drop(['index'],axis =1)
     # ----------------- 01 -----------------
     features1_5_10 = pd.concat([features10_n, features5_n , features1_n],axis=1)
     return features1_5_10
