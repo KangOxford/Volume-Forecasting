@@ -54,7 +54,7 @@ def cut_tail(groupped_quantity):
     new = new[new >= btm_quantity]
     return new 
 
-def get_basic_features(groupped_message):
+def get_basic_features(groupped_message, window_size = 1):
     def get_num_vol_ntn(item, signal, sym = ''):
         bid_item = item[item.side == 1]; ask_item = item[item.side == -1]
         signal[sym + 'bid_num_orders'] = bid_item.shape[0]; signal[sym+'ask_num_orders'] = ask_item.shape[0]
@@ -68,7 +68,7 @@ def get_basic_features(groupped_message):
             time_index = (string_[-8:-6], string_[-5:-3])
         return time_index
 
-    def window(seq, n=5):
+    def window(seq, n=1):
         from itertools import islice
         "Returns a sliding window (of width n) over data from the iterable"
         "   s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...                   "
@@ -79,19 +79,22 @@ def get_basic_features(groupped_message):
         for elem in it:
             result = result[1:] + (elem,)
             yield result
-    w = window(groupped_message)  
+    w = window(groupped_message, window_size)  
     signal_list = []
     for next_w in w:
         # ----------------- 01 -----------------
         # next_w = next(w)
         list_ = [item[1] for item in next_w]
         item = pd.concat(list_)  
-        time_index = next_w[-1][0] 
+        time_index_start = next_w[0][0] 
+        time_index_end = next_w[-1][0] 
         # time_index, item = bigram[0], bigram[1]
         # ----------------- 01 -----------------
         signal = {}
-        time_index = time_index_formatting(time_index)
-        signal['timeHM_start'] = str(time_index[0]).zfill(2) + str(time_index[1]).zfill(2)
+        time_index_start = time_index_formatting(time_index_start)
+        time_index_end = time_index_formatting(time_index_end)
+        signal['timeHM_start'] = str(time_index_start[0]).zfill(2) + str(time_index_start[1]).zfill(2)
+        signal['timeHM_end'] = str(time_index_end[0]).zfill(2) + str(time_index_end[1]).zfill(2)
         x_bid = sum(item.side == 1); x_ask = sum(item.side == -1)
         signal['imbalance'] = (x_bid - x_ask)/(x_bid + x_ask)
         
@@ -113,10 +116,10 @@ def get_basic_features(groupped_message):
         signal_list.append(signal)
         # print() #$
     features = pd.DataFrame(signal_list)
-    features['timeHM_end'] = features.timeHM_start.shift(-1); features.timeHM_end.iloc[-1] = '1600'
+    features['timeHM_end'] = features.timeHM_end.shift(-1); features.timeHM_end.iloc[-1] = '1600'
     return features
 
-def get_data():
+def get_data(window_size =1):
     message = get_message_data()
 
     orderbook_data = get_orderbook_data()
@@ -124,7 +127,7 @@ def get_data():
     merged_message = timestamp_format(merged_message)
     groupped_message = split_into_bucket(merged_message)
     # plot_single_value(groupped_quantity.values)
-    features = get_basic_features(groupped_message)
+    features = get_basic_features(groupped_message,window_size)
     features['volume'] = features.bid_volume + features.ask_volume
     features['vol_change'] = features.volume.diff()/features.volume
     features['vol_direction'] = features.vol_change.apply(lambda x: -1 if x<= 0 else 1)
@@ -150,13 +153,21 @@ def get_data():
 #     # features['target'] = features['volume'].shift(-1)
 #     # return features.dropna(),features   
 
-# def feature_overlap(features, window= 5):
+def feature_overlap(windows= [1,5]):
+    level1,level2 = windows[0], windows[1]
+    features1, _ = get_data(level1)
+    features5, _ = get_data(level2)
+    features1_new = features1.shift(-level2)
+    features1_n = features1_new.dropna(axis = 0)
+    features5_new = features5.drop(['target'],axis =1)
+    features5_n = features5_new.iloc[:-level1,:]
+    features5_n.columns = ["5_"+item for item in features5_n.columns]
+    features1_5 = pd.concat([features5_n , features1_n],axis=1)
+    return features1_5
     
     
 if __name__=="__main__":
-    
-    features, raw_features = get_data()
-    # get_overlap_data()
+    features1_5 = feature_overlap()
     
     
     
