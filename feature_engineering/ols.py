@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from data_processing.data_pipeline import get_data, feature_disjoint
+from data_processing.data_pipeline import get_data
+# from data_processing.data_pipeline import feature_overlap
+# from data_processing.data_pipeline import feature_disjoint
 from feature_engineering.utils import data_split
 
 
@@ -24,9 +26,9 @@ def ols(train, test):
     return out_of_sample(results, test)
   
 if __name__ == "__main__":
-    # data,_ = get_data()
+    data,_ = get_data()
     # data = feature_overlap()
-    data = feature_disjoint()
+    # data = feature_disjoint()
     train, test = data_split(data,size = 10)
     out_of_sample = ols(train, test)
     print(f">>> out_of_sample: {out_of_sample}")

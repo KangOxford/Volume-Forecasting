@@ -137,32 +137,32 @@ def get_data(window_size =1):
     return features.dropna(),features   
 
 
-# def feature_disjoint(windows= [1,5]):
-#     level1,level2 = windows[0], windows[1]
-#     features1, _ = get_data(level1)
-#     features5, _ = get_data(level2)
-#     features1_new = features1.shift(-level2)
-#     features1_n = features1_new.dropna(axis = 0)
-#     features5_new = features5.drop(['target'],axis =1)
-#     features5_n = features5_new.iloc[:-level1,:]
-#     features5_n.columns = ["5_"+item for item in features5_n.columns]
-#     features1_5 = pd.concat([features5_n , features1_n],axis=1)
-#     return features1_5
-
-def feature_overlap(windows= [1,5]):
+def feature_disjoint(windows= [1,5]):
     level1,level2 = windows[0], windows[1]
     features1, _ = get_data(level1)
     features5, _ = get_data(level2)
-    # ----------------- 01 -----------------
-    # breakpoint()
-    features1_new = features1.shift(-level2+1)
+    features1_new = features1.shift(-level2)
     features1_n = features1_new.dropna(axis = 0)
-    # ----------------- 01 -----------------
-    features5_n = features5.drop(['target'],axis =1)
+    features5_new = features5.drop(['target'],axis =1)
+    features5_n = features5_new.iloc[:-level1,:]
     features5_n.columns = ["5_"+item for item in features5_n.columns]
-    # ----------------- 01 -----------------
     features1_5 = pd.concat([features5_n , features1_n],axis=1)
     return features1_5
+
+# def feature_overlap(windows= [1,5]):
+#     level1,level2 = windows[0], windows[1]
+#     features1, _ = get_data(level1)
+#     features5, _ = get_data(level2)
+#     # ----------------- 01 -----------------
+#     # breakpoint()
+#     features1_new = features1.shift(-level2+1)
+#     features1_n = features1_new.dropna(axis = 0)
+#     # ----------------- 01 -----------------
+#     features5_n = features5.drop(['target'],axis =1)
+#     features5_n.columns = ["5_"+item for item in features5_n.columns]
+#     # ----------------- 01 -----------------
+#     features1_5 = pd.concat([features5_n , features1_n],axis=1)
+#     return features1_5
 
 # def feature_overlap(windows= [1,5,10]):
 #     level1,level2,level3 = windows[0], windows[1],windows[2]
