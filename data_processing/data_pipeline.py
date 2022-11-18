@@ -136,24 +136,8 @@ def get_data(window_size =1):
     features['target'] = features['volume'].shift(-1)
     return features.dropna(),features   
 
-# def get_overlap_data():
-#     message = get_message_data()
 
-#     orderbook_data = get_orderbook_data()
-#     merged_message = pd.merge(message, orderbook_data, how = "left")
-#     merged_message = timestamp_format(merged_message)
-#     groupped_message, groupped_quantity = split_by_resample(merged_message)
-#     print()
-#     # features = get_basic_features(groupped_message)
-#     # features['volume'] = features.bid_volume + features.ask_volume
-#     # features['vol_change'] = features.volume.diff()/features.volume
-#     # features['vol_direction'] = features.vol_change.apply(lambda x: -1 if x<= 0 else 1)
-#     # features.timeHM_start = features.timeHM_start.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
-#     # features.timeHM_end = features.timeHM_end.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
-#     # features['target'] = features['volume'].shift(-1)
-#     # return features.dropna(),features   
-
-# def feature_overlap(windows= [1,5]):
+# def feature_disjoint(windows= [1,5]):
 #     level1,level2 = windows[0], windows[1]
 #     features1, _ = get_data(level1)
 #     features5, _ = get_data(level2)
@@ -165,25 +149,52 @@ def get_data(window_size =1):
 #     features1_5 = pd.concat([features5_n , features1_n],axis=1)
 #     return features1_5
 
-def feature_overlap(windows= [1,5,10]):
+# def feature_overlap(windows= [1,5,10]):
+#     level1,level2,level3 = windows[0], windows[1],windows[2]
+#     features1, _ = get_data(level1)
+#     features5, _ = get_data(level2)
+#     features10, _ = get_data(level3)
+#     # ----------------- 01 -----------------
+#     features1_new = features1.shift(-level3+1)
+#     features1_n = features1_new.dropna(axis = 0)
+#     # ----------------- 01 -----------------
+#     features5_new = features5.drop(['target'],axis =1)
+#     features5_n = features5_new.shift(-(level3-level2))
+#     features5_n = features5_n.dropna(axis = 0)
+#     # features5_n = features5_new.iloc[:-level1,:]
+#     features5_n.columns = ["5_"+item for item in features5_n.columns]
+#     # ----------------- 01 -----------------
+#     features10_n = features10.drop(['target'],axis =1)
+#     features10_n.columns = ["10_"+item for item in features10_n.columns]
+#     # ----------------- 01 -----------------
+#     features1_5_10 = pd.concat([features10_n, features5_n , features1_n],axis=1)
+#     return features1_5_10
+
+def feature_disjoint(windows= [1,5,10]):
     level1,level2,level3 = windows[0], windows[1],windows[2]
     features1, _ = get_data(level1)
     features5, _ = get_data(level2)
     features10, _ = get_data(level3)
     # ----------------- 01 -----------------
-    features1_new = features1.shift(-level2)
+    features1_new = features1.shift(-level3+1)
     features1_n = features1_new.dropna(axis = 0)
     # ----------------- 01 -----------------
     features5_new = features5.drop(['target'],axis =1)
-    features5_n = features5_new.iloc[:-level1,:]
+    features5_n = features5_new.shift(-(level3-level2))
+    features5_n = features5_n.dropna(axis = 0)
+    # features5_n = features5_new.iloc[:-level1,:]
     features5_n.columns = ["5_"+item for item in features5_n.columns]
     # ----------------- 01 -----------------
-    features1_5 = pd.concat([features5_n , features1_n],axis=1)
-    return features1_5
+    features10_n = features10.drop(['target'],axis =1)
+    features10_n.columns = ["10_"+item for item in features10_n.columns]
+    # ----------------- 01 -----------------
+    features1_5_10 = pd.concat([features10_n, features5_n , features1_n],axis=1)
+    return features1_5_10
     
     
 if __name__=="__main__":
-    features1_5_10 = feature_overlap()
+    # features1_5_10 = feature_overlap()
+    features1_5_10 = feature_disjoint()
     
     
     
