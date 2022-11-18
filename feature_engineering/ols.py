@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
-from data_processing.data_pipeline import get_data, feature_overlap, feature_disjoint
+from data_processing.data_pipeline import get_data, feature_disjoint
 from feature_engineering.utils import data_split
 
 
@@ -12,7 +12,7 @@ def ols(train, test):
         pred_x = sm.add_constant(pred_x, has_constant='add')
         pred_y = results.predict(pred_x)
         real_y = test[1]
-        from sklearn.metrics import mean_squared_error, r2_score
+        from sklearn.metrics import r2_score
         r_squared = r2_score(real_y,pred_y)  
         return r_squared
     import statsmodels.api as sm
