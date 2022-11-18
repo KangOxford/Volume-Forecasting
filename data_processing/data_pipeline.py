@@ -67,7 +67,6 @@ def get_basic_features(groupped_message):
             string_ = str(time_index)
             time_index = (string_[-8:-6], string_[-5:-3])
         return time_index
-    
 
     def window(seq, n=5):
         from itertools import islice
@@ -80,14 +79,16 @@ def get_basic_features(groupped_message):
         for elem in it:
             result = result[1:] + (elem,)
             yield result
-    seq = [i for i in range(100)]
-    w = window(seq)  
-next(w)      
-        
+    w = window(groupped_message)  
     signal_list = []
-    for bigram in groupped_message:
+    for bigram in w:
         # ----------------- 01 -----------------
-        time_index, item = bigram[0], bigram[1]
+        next_w = next(w)
+        list_ = [item[1] for item in next_w]
+        item = pd.concat(list_)  
+        time_index = next_w[-1][0] 
+        # time_index, item = bigram[0], bigram[1]
+        # ----------------- 01 -----------------
         signal = {}
         time_index = time_index_formatting(time_index)
         signal['timeHM_start'] = str(time_index[0]).zfill(2) + str(time_index[1]).zfill(2)
