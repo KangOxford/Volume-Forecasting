@@ -81,9 +81,9 @@ def get_basic_features(groupped_message):
             yield result
     w = window(groupped_message)  
     signal_list = []
-    for bigram in w:
+    for next_w in w:
         # ----------------- 01 -----------------
-        next_w = next(w)
+        # next_w = next(w)
         list_ = [item[1] for item in next_w]
         item = pd.concat(list_)  
         time_index = next_w[-1][0] 
