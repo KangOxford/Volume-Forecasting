@@ -34,26 +34,18 @@ def plot_single_value(value):
     from matplotlib.pyplot import figure
     figure(figsize=(50, 10), dpi=80)
     plt.plot(value)
-
-def split_into_bucket(message):
     
-    msg1 = message.resample('5min') 
-    for item in msg1:
-        print(item)
-        break
+# def split_by_resample(message):
+#     msg1 = message.resample('5min') 
+#     return msg1    
     
-def split_by_resample(message):
-    msg1 = message.resample('5min') 
-    return msg1    
-    
-    
-    
-    
-    
-    
-    groupped_message = message.groupby([[d.hour for d in message.index],[d.minute for d in message.index]])
-    groupped_quantity = message['quantity'].groupby([[d.hour for d in message.index],[d.minute for d in message.index]]).sum()
-    return groupped_message, groupped_quantity
+def split_into_bucket(message, freq = '1min'):
+    msg = message.reset_index()
+    # groupped_message = msg.groupby(pd.Grouper(key = 'time', axis = 0, freq = '5min'))
+    # groupped_message = msg.groupby(pd.Grouper(key = 'time', axis = 0, freq = freq))
+    groupped_message = msg.groupby(pd.Grouper(key = 'time', axis = 0, freq = freq))
+    # groupped_message = message.groupby([[d.hour for d in message.index],[d.minute for d in message.index]])
+    return groupped_message
 
 def cut_tail(groupped_quantity):
     top_quantity = groupped_quantity.quantile(0.95)
@@ -70,10 +62,26 @@ def get_basic_features(groupped_message):
         signal[sym+'bid_notional']=(bid_item.quantity * bid_item.price).sum()/Config.scale_level
         signal[sym+'ask_notional']=(ask_item.quantity * ask_item.price).sum()/Config.scale_level
         return signal
+    def time_index_formatting(time_index):
+        if type(time_index) == pd._libs.tslibs.timestamps.Timestamp:
+            string_ = str(time_index)
+            time_index = (string_[-8:-6], string_[-5:-3])
+        return time_index
+    def window(seq, n=5):
+        from itertools import islice
+        it = iter(seq)
+        result = tuple(islice(it, n))
+        if len(result) == n:
+            yield result
+        for element in it:
+            result = result[1:] + (element,)
+            yield result
     signal_list = []
-    for time_index, item in groupped_message:
+    for bigram in groupped_message:
         # ----------------- 01 -----------------
+        time_index, item = bigram[0], bigram[1]
         signal = {}
+        time_index = time_index_formatting(time_index)
         signal['timeHM_start'] = str(time_index[0]).zfill(2) + str(time_index[1]).zfill(2)
         x_bid = sum(item.side == 1); x_ask = sum(item.side == -1)
         signal['imbalance'] = (x_bid - x_ask)/(x_bid + x_ask)
@@ -105,7 +113,7 @@ def get_data():
     orderbook_data = get_orderbook_data()
     merged_message = pd.merge(message, orderbook_data, how = "left")
     merged_message = timestamp_format(merged_message)
-    groupped_message, groupped_quantity = split_into_bucket(merged_message)
+    groupped_message = split_into_bucket(merged_message)
     # plot_single_value(groupped_quantity.values)
     features = get_basic_features(groupped_message)
     features['volume'] = features.bid_volume + features.ask_volume
@@ -116,14 +124,30 @@ def get_data():
     features['target'] = features['volume'].shift(-1)
     return features.dropna(),features   
 
+# def get_overlap_data():
+#     message = get_message_data()
+
+#     orderbook_data = get_orderbook_data()
+#     merged_message = pd.merge(message, orderbook_data, how = "left")
+#     merged_message = timestamp_format(merged_message)
+#     groupped_message, groupped_quantity = split_by_resample(merged_message)
+#     print()
+#     # features = get_basic_features(groupped_message)
+#     # features['volume'] = features.bid_volume + features.ask_volume
+#     # features['vol_change'] = features.volume.diff()/features.volume
+#     # features['vol_direction'] = features.vol_change.apply(lambda x: -1 if x<= 0 else 1)
+#     # features.timeHM_start = features.timeHM_start.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
+#     # features.timeHM_end = features.timeHM_end.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
+#     # features['target'] = features['volume'].shift(-1)
+#     # return features.dropna(),features   
+
 # def feature_overlap(features, window= 5):
     
     
 if __name__=="__main__":
     
     features, raw_features = get_data()
-    # plot_single_value(features.vol_direction)
-    # feature_overlap(features)
+    # get_overlap_data()
     
     
     
