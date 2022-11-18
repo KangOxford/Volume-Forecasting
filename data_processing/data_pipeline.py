@@ -67,15 +67,23 @@ def get_basic_features(groupped_message):
             string_ = str(time_index)
             time_index = (string_[-8:-6], string_[-5:-3])
         return time_index
+    
+
     def window(seq, n=5):
         from itertools import islice
+        "Returns a sliding window (of width n) over data from the iterable"
+        "   s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...                   "
         it = iter(seq)
         result = tuple(islice(it, n))
         if len(result) == n:
             yield result
-        for element in it:
-            result = result[1:] + (element,)
+        for elem in it:
+            result = result[1:] + (elem,)
             yield result
+    seq = [i for i in range(100)]
+    w = window(seq)  
+next(w)      
+        
     signal_list = []
     for bigram in groupped_message:
         # ----------------- 01 -----------------
