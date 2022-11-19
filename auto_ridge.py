@@ -13,6 +13,7 @@ import numpy as np
 # import math
 # import matplotlib.pyplot as plt
 # from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import RidgeCV
 from sklearn.model_selection import GridSearchCV
 # import xgboost as xgb
 from sklearn.metrics import r2_score
@@ -47,6 +48,7 @@ if __name__ == "__main__":
     grid_search.fit(X,Y)
     print(f">>> grid_search.best_params_:{grid_search.best_params_}")
     
+    clf = RidgeCV(alphas = np.arange(0.001,2,0.01),store_cv_values=True, cv=None)
     rf = RandomForestRegressor(n_estimators = grid_search.best_params_['n_estimators'], \
                                max_features = grid_search.best_params_['max_features'])
     rf.fit(X,np.array(Y))

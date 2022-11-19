@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['data_processing/test_features.py', 'data_processing/data_pipeline.py', 'feature_engineering/ols.py', '../../opt/anaconda3/lib/python3.9/site-packages/sklearn/metrics/_regression.py', 'feature_engineering/regression.py', 'feature_engineering/utils.py', 'modelling/rf.py', 'modelling/xgboost.py', 'modelling/auto_rf.py', 'modelling/auto_xgboost.py']
+recent_files = ['data_processing/intraday_data_pipeline.py', 'data_processing/utils.py', 'data_processing/config.py', 'data_processing/get_data.py']
 
 [main]
 version = 0.2.0
