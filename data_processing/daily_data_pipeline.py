@@ -55,8 +55,19 @@ def get_basic_features(groupped_message, window_size = 1):
         open_time = '09:30:00'
         open_session = datetime.strptime(str(date)+"-"+open_time, '%Y-%m-%d-%H:%M:%S')
         # datetime.timestamp(open_session)
-        item.time.apply(datetime.fromtimestamp)
-        a = item.time < open_session
+        
+        
+        time = item.time.map(lambda x: x.to_pydatetime())
+        t = item.time[0].to_pydatetime()
+        # datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+        
+        
+        # a = item.time < open_session
+        a = t < open_session
+        
+        
+        
+        
         if '0930'<= signal['timeHM_start'] and signal['timeHM_start'] <='1000':
             signal['intrady_session'] = 0
         elif '1530'<= signal['timeHM_start'] and signal['timeHM_start'] <='1600':
