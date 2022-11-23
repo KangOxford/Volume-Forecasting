@@ -52,18 +52,29 @@ def get_basic_features(groupped_message, window_size = 1):
         
         from datetime import datetime
         date = item.time[0].date()
-        open_time = '09:30:00'
+        open_time = '10:00:00'
         open_session = datetime.strptime(str(date)+"-"+open_time, '%Y-%m-%d-%H:%M:%S')
         # datetime.timestamp(open_session)
         
         
-        time = item.time.map(lambda x: x.to_pydatetime())
-        t = item.time[0].to_pydatetime()
-        # datetime.strptime(t, '%Y-%m-%d %H:%M:%S')
+        # time = item.time.map(lambda x: x.to_pydatetime())
+        # new_t = item.time.map(lambda x: x.to_pydatetime())
+        date_time = []
+        for i in range(item.time.shape[0]):
+            t = item.time[i].to_pydatetime()
+            date_time.append(t)
+        date_time = np.array(date_time)    
+        open_ = date_time < open_session
+        item['session'] = open_.astype(np.int)
         
         
-        # a = item.time < open_session
-        a = t < open_session
+        
+        
+        # item['session'] =
+        # date_time_series = pd.Series(date_time)
+        # item['datetime'] = date_time
+        
+        
         
         
         
