@@ -20,8 +20,8 @@ def get_basic_features(groupped_message, window_size = 1):
         bid_item = item[item.side == 1]; ask_item = item[item.side == -1]
         signal[sym + 'bid_num_orders'] = bid_item.shape[0]; signal[sym+'ask_num_orders'] = ask_item.shape[0]
         signal[sym+'bid_volume'] = bid_item.quantity.sum(); signal[sym+'ask_volume'] = ask_item.quantity.sum()        
-        signal[sym+'bid_notional']=(bid_item.quantity * bid_item.price).sum()/Config.scale_level
-        signal[sym+'ask_notional']=(ask_item.quantity * ask_item.price).sum()/Config.scale_level
+        # signal[sym+'bid_notional']=(bid_item.quantity * bid_item.price).sum()/Config.scale_level
+        # signal[sym+'ask_notional']=(ask_item.quantity * ask_item.price).sum()/Config.scale_level
         return signal
     def time_index_formatting(time_index):
         if type(time_index) == pd._libs.tslibs.timestamps.Timestamp:
@@ -48,17 +48,14 @@ def get_basic_features(groupped_message, window_size = 1):
         list_ = [item[1] for item in next_w]
         item = pd.concat(list_)  
         # ----------------- 01 -----------------
-        signal = {}
         
+        # ----------------- 01 -----------------
         from datetime import datetime
         date = item.time[0].date()
         open_time = '10:00:00'
         open_session = datetime.strptime(str(date)+"-"+open_time, '%Y-%m-%d-%H:%M:%S')
-        # datetime.timestamp(open_session)
-        
-        
-        # time = item.time.map(lambda x: x.to_pydatetime())
-        # new_t = item.time.map(lambda x: x.to_pydatetime())
+
+
         date_time = []
         for i in range(item.time.shape[0]):
             t = item.time[i].to_pydatetime()
@@ -68,39 +65,38 @@ def get_basic_features(groupped_message, window_size = 1):
         item['session'] = open_.astype(np.int)
         
         
+        # ----------------- 01 -----------------
+        from datetime import datetime
+        date = item.time[0].date()
+        close_time = '15:30:00'
+        close_session = datetime.strptime(str(date)+"-"+close_time, '%Y-%m-%d-%H:%M:%S')
         
-        
-        # item['session'] =
-        # date_time_series = pd.Series(date_time)
-        # item['datetime'] = date_time
-        
-        
-        
-        
-        
-        
-        if '0930'<= signal['timeHM_start'] and signal['timeHM_start'] <='1000':
-            signal['intrady_session'] = 0
-        elif '1530'<= signal['timeHM_start'] and signal['timeHM_start'] <='1600':
-            signal['intrady_session'] = 2
-        else:
-            signal['intrady_session'] = 1
-        # ----------------- 02 -----------------
-        signal = get_num_vol_ntn(item, signal)
-        # ----------------- 03 -----------------
-        item['aggressive'] = ((item.price >= item.mid_price) & (item.side == 1)) | ((item.price <= item.mid_price) & (item.side == -1))
-        aggressive = item[item.aggressive]
-        signal = get_num_vol_ntn(aggressive, signal, sym = 'ag_')
-        # # ----------------- 04 -----------------
-        # signal['volume'] = item.quantity.sum()
-        # ----------------- 05 -----------------
-        signal_list.append(signal)
-        # print() #$
-    features = pd.DataFrame(signal_list)
-    features['timeHM_end'] = features.timeHM_end.shift(-1); features.timeHM_end.iloc[-1] = '1600'
-    return features
+        date_time = []
+        for i in range(item.time.shape[0]):
+            t = item.time[i].to_pydatetime()
+            date_time.append(t)
+        date_time = np.array(date_time)    
+        close_ = date_time > close_session
+        item['session'] =  item['session'] + 3*close_.astype(np.int)
+        # ----------------- 01 -----------------
+        item['intraday_session'] = item['session'].apply(lambda x : 2 if x==0 else x)
+        item = item.drop(['session'], axis = 1)
+        groupped = item.groupby(item.intraday_session)
+        signal = {}
+        for index, item in groupped:
+            if index == 1: symbol = 'daily_open_'
+            elif index == 2: symbol = 'daily_middle_'
+            elif index == 3: symbol = 'daily_close_'
+            else: raise NotImplementedError 
+            signal = get_num_vol_ntn(item, signal, symbol)
 
-def get_data(window_size =1):
+            item['aggressive'] = ((item.price >= item.mid_price) & (item.side == 1)) | ((item.price <= item.mid_price) & (item.side == -1))
+            aggressive = item[item.aggressive]
+            signal = get_num_vol_ntn(aggressive, signal, sym = symbol +'ag_')
+        features = pd.Series(signal)
+        return features
+
+def daily_get_data(window_size =1):
     message = get_message_data()
 
     orderbook_data = get_orderbook_data()
@@ -109,14 +105,8 @@ def get_data(window_size =1):
     groupped_message = split_into_bucket(merged_message)
     # plot_single_value(groupped_quantity.values)
     features = get_basic_features(groupped_message,window_size)
-    features['volume'] = features.bid_volume + features.ask_volume
-    features['vol_change'] = features.volume.diff()/features.volume
-    features['vol_direction'] = features.vol_change.apply(lambda x: -1 if x<= 0 else 1)
-    features.timeHM_start = features.timeHM_start.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
-    features.timeHM_end = features.timeHM_end.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
-    features['target'] = features['volume'].shift(-1)
-    return features.dropna(),features   
+    return features   
 
 
 if __name__=="__main__":
-    features, _ = get_data()
+    features = daily_get_data()
