@@ -11,8 +11,19 @@ class DataPath:
          "/Users/kang/Desktop/Volume-Tranformer/AMZN_2021-04-01_34200000_57600000_orderbook_50.csv"),
         ]
     level10 = [
-        ("/Users/kang/Data/AMZN_2021/AMZN_2021-04-15_34200000_57600000_message_10.csv",
-         "/Users/kang/Data/AMZN_2021/AMZN_2021-04-15_34200000_57600000_orderbook_10.csv")
+        ("/Users/kang/Data/AMZN_2021/AMZN_2021-04-26_34200000_57600000_message_10.csv",
+         "/Users/kang/Data/AMZN_2021/AMZN_2021-04-26_34200000_57600000_orderbook_10.csv")
+        # ("/Users/kang/Data/AMZN_2021/AMZN_2021-04-21_34200000_57600000_message_10.csv",
+        #  "/Users/kang/Data/AMZN_2021/AMZN_2021-04-21_34200000_57600000_orderbook_10.csv")
+        
+        # ("/Users/kang/Data/AMZN_2021/AMZN_2021-04-20_34200000_57600000_message_10.csv",
+        #  "/Users/kang/Data/AMZN_2021/AMZN_2021-04-20_34200000_57600000_orderbook_10.csv")
+        
+        # ("/Users/kang/Data/AMZN_2021/AMZN_2021-04-19_34200000_57600000_message_10.csv",
+        #  "/Users/kang/Data/AMZN_2021/AMZN_2021-04-19_34200000_57600000_orderbook_10.csv")
+
+        # ("/Users/kang/Data/AMZN_2021/AMZN_2021-04-15_34200000_57600000_message_10.csv",
+        #  "/Users/kang/Data/AMZN_2021/AMZN_2021-04-15_34200000_57600000_orderbook_10.csv")
         ]
         
 

@@ -191,13 +191,34 @@ def feature_disjoint1_5_10(windows= [1,5,10]):
     features1_5_10 = pd.concat([features10_n, features5_n , features1_n],axis=1)
     return features1_5_10
 
-    
-    
+def update_symbol(feature):
+    feature.insert(0, 'symbol', pd.Series([symbol for i in range(feature.shape[0])], index = np.arange(feature.shape[0])))    
+    return feature
+
+
 if __name__=="__main__":
-    # features, _ = get_data()
-    features1_5_10 = feature_overlap1_5_10()
-    # features1_5_10 = feature_disjoint()
-    # features1_5 = feature_overlap()
+    # symbol = "AMZN_"
+    symbol = "210426_"
+    
+    features1, _ = get_data(); 
+    features1= update_symbol(features1)
+    features1.to_csv(symbol+"single_1.csv")
+    
+    features1_5_10_overlap = feature_overlap1_5_10(); 
+    features1_5_10_overlap = update_symbol(features1_5_10_overlap)
+    features1_5_10_overlap.to_csv(symbol+"overlap1_5_10.csv")
+    
+    features1_5_overlap = feature_overlap1_5();
+    features1_5_overlap = update_symbol(features1_5_overlap)
+    features1_5_overlap.to_csv(symbol+"overlap1_5.csv")
+    
+    features1_5_disjoint = feature_disjoint1_5();
+    features1_5_disjoint = update_symbol(features1_5_disjoint)
+    features1_5_disjoint.to_csv(symbol+"disjoint1_5.csv")
+    
+    features1_5_10_disjoint = feature_disjoint1_5_10();
+    features1_5_10_disjoint = update_symbol(features1_5_10_disjoint)
+    features1_5_10_disjoint.to_csv(symbol+"disjoint1_5_10.csv")
     
     
     

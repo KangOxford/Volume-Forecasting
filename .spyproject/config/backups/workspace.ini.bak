@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['data_processing/intraday_data_pipeline.py', 'data_processing/utils.py', 'data_processing/config.py', 'data_processing/get_data.py', '../../Downloads/daily_data_pipeline.py']
+recent_files = ['data_processing/intraday_data_pipeline.py', 'data_processing/daily_data_pipeline.py', 'data_processing/mixed_data_pipeline.py', 'feature_engineering/ols.py']
 
 [main]
 version = 0.2.0
