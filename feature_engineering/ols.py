@@ -28,6 +28,7 @@ def ols(train, test):
     return out_of_sample(results, test)
   
 if __name__ == "__main__":
+    # data = df1 #$
     data = mixed_get_data()
     # data,_ = get_data()
     # data = feature_overlap()
@@ -36,12 +37,15 @@ if __name__ == "__main__":
     out_of_sample = ols(train, test)
     print(f">>> out_of_sample: {out_of_sample}")
 
+# new = df.iloc[5:,:]
 
+# c = np.array([['A','B', 'C',"D","F"] for i in range(len(new)//5)])
+# d = c.reshape(-1)
+# newer = new
 
+# newer.symbol = d
 
-
-
-
+# n = newer.iloc[:,1:]
 
 
 
