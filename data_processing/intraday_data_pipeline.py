@@ -102,7 +102,10 @@ def get_data(index, window_size =1):
     features.timeHM_start = features.timeHM_start.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
     features.timeHM_end = features.timeHM_end.apply(lambda x: int(x[0:2]) + int(x[2:])*0.01)
     features['target'] = features['volume'].shift(-1)
-    return features.dropna(),features   
+    return features.dropna(),features
+
+# def get_simple_data(index, window_size = 1):
+
 
 def overlap(string):
     if string == "1_5":
@@ -231,7 +234,6 @@ if __name__=="__main__":
     index, symbol = 0, "210426"
     data_dict = get_single_day_data(index, symbol)
 
-    
     
     
     
