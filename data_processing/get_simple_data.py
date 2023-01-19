@@ -91,6 +91,7 @@ def get_simple_volume(datapath, index):
     groupped_message = split_into_bucket(merged_message)
     features = get_volume(groupped_message, window_size)
     return features
+
 def get_wrapped_volume(datapath, index):
     features = get_simple_volume(datapath, index)
     date = datapath.level10[index][0].split('_')[1]
@@ -103,19 +104,31 @@ def get_wrapped_volume(datapath, index):
     new_features.time = new_features.time.apply(lambda x:
                             datetime.time(int(x[:2]), \
                                           int(x[2:])))
-    return new_features
+    rst = new_features[['date','time','sym','volume']]
+    return rst
+
+def get_monthly_volume():
+    # window_size = 1
+    datapath = DataPath()
+    # datapath_size = len(datapath.level10)
+    features_list = []
+    for index in range(len(datapath.level10)):
+        # index = 1
+        # print(index)
+        features = get_wrapped_volume(datapath, index)
+        features_list.append(features)
+    concatted_features = pd.concat(features_list)
+    concatted_features = concatted_features.reset_index()
+    return concatted_features
 
 if __name__ == "__main__":
-    window_size = 1
-    datapath = DataPath()
-    datapath_size = len(datapath.level10)
-    index = 0
+    features = get_monthly_volume()
+    features.to_csv("features.csv")
+    features.to_pickle("features.pkl")
 
-    features = get_wrapped_volume(datapath, index)
-
-    import matplotlib.pyplot as plt
-    plt.figure(dpi=600, figsize=(20, 6))
-    features.volume.plot()
-    plt.show()
+    # import matplotlib.pyplot as plt
+    # plt.figure(dpi=600, figsize=(20, 6))
+    # features.volume.plot()
+    # plt.show()
 
 
