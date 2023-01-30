@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import pickle
 # %matplotlib inline
 #
-# import warnings
-# warnings.filterwarnings(action='ignore')
+import warnings
+warnings.filterwarnings(action='ignore')
 
 df = pd.read_csv("/Users/kang/Desktop/Volume-Forecasting/features.csv")[["date","time","sym","volume"]]
 
@@ -146,7 +146,7 @@ def TimeDiff(time):
 df_clean_10["time_diff"] = df_clean_10["time"].copy().apply(TimeDiff)
 
 df_clean_10.info()
-df_clean_10 = df_clean_10.dropna()
+df_cleaned_10 = df_clean_10.dropna()
 # df_cleaned_10.to_pickle("df_clean_10.pkl")
 # df_cleaned_10 = pd.read_pickle("df_clean_10.pkl")
 
@@ -173,18 +173,51 @@ Dterm_list_10 = []
 for sym_name in syms:
     # sym_name = syms[0]
     mask = df_clean_10.sym == sym_name
-    temp = DtermBlend(30, 1/3, df_clean_10[mask], ADV_num = 20)
+    temp = DtermBlend(30, 1/3, df_clean_10[mask], ADV_num = rws)
     temp["Deter_Blend_interval_vol"] = temp.groupby('date').apply(lambda x :x.Deter_Blend.shift(1)*x.vol_prof_mean).values
     temp.loc[temp.time==datetime.strptime('09:40', '%H:%M').time(),"Deter_Blend_interval_vol"]  = temp[temp.time==datetime.strptime('09:40', '%H:%M').time()].daily_vol_mean*temp[temp.time==datetime.strptime('09:40', '%H:%M').time()].vol_prof_mean
     Dterm_list_10.append(temp)
 
 df_Dterm_10 = pd.concat(Dterm_list_10)
 
-df_Dterm_10
+# =================
+
+# For whole data set & for random continuous 5 days for each sym
+
+import random
+import matplotlib.pyplot as plt
+
+for sym_name in syms:
+    # sym_name = syms[0]
+    mask = df_Dterm_10.sym == sym_name
+    temp = df_Dterm_10[mask].dropna().set_index("date_time")
+    temp.index = temp.index.to_series().apply(lambda x: x.strftime('%Y-%m-%d %H:%M'))
+    index = random.randrange(0, 4095)
+    # temp[["cum_sum_vol", "daily_vol", "Deter_Blend", "daily_vol_mean"]].plot(figsize=(18, 8), title=sym_name + " 10-min")
+    # plt.xlabel("Time")
+    # plt.ylabel("Volume")
+    plt.show()
+
+    rand_temp = temp.iloc[index:index + 5 * 39]
+    # rand_temp[["cum_sum_vol", "daily_vol", "Deter_Blend", "daily_vol_mean"]].plot(figsize=(18, 8), title=sym_name + " 10-min")
+    plt.xlabel("Time")
+    plt.ylabel("Volume")
+    plt.show()
+
+    fig, ax = plt.subplots(figsize=(18, 8))
+    ax.scatter(rand_temp.index, rand_temp["Deter_Blend_interval_vol"], label="Deter_Blend_interval_vol")
+    ax.scatter(rand_temp.index, rand_temp["volume"], label="realized volume")
+    xpositions = rand_temp[rand_temp.time == datetime.strptime('09:40', '%H:%M').time()].index.values
+    for xc in xpositions:
+        plt.axvline(x=xc, color='k', linestyle='--')
+    # ax.set_xticks(rand_temp.index[::39])
+    # ax.set_title(sym_name + " 10-min" + " Intraday volume distribution")
+    # ax.set_xlabel("Time")
+    # ax.set_ylabel("Volume")
+    plt.show()
 
 
 
-temp.groupby('date').apply(lambda x :x.Deter_Blend.shift(1)*x.vol_prof_mean)
 
 
 
