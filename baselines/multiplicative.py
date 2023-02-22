@@ -6,55 +6,42 @@ from datetime import datetime, timedelta, date
 import time
 import seaborn as sns
 import matplotlib.pyplot as plt
-import warnings
-warnings.filterwarnings(action='ignore')
+# import warnings;warnings.filterwarnings(action='ignore')
 import pickle
 import datetime
 # df = pd.read_csv("/Users/kang/Desktop/Volume-Forecasting/features.csv")[["date","time","sym","volume"]]
-# df = pd.read_pickle("/Users/kang/Desktop/Volume-Forecasting/features.pkl")
-df = pd.read_pickle(os.environ['HOME'] + "/Volume-Forecasting/features.pkl")
-# import os;os.system("echo $HOME/Volume-Forecasting/")
+df = pd.read_pickle("/Users/kang/Desktop/Volume-Forecasting/features.pkl")
+# df = pd.read_pickle(os.environ['HOME'] + "/Volume-Forecasting/features.pkl")
 
 df = df[df.date != datetime.date(2021,4,12)]
 df.volume = df.volume+1
 df['Index'] = df.index
 df.index = df.index+1
 
-
-# fig, ax = plt.subplots(figsize=(100, 8))
-# ax.scatter(df.index, df["volume"])
-# xpositions = df[df.time == datetime.strptime('09:40', '%H:%M').time()].index.values
-# for xc in xpositions:
-#     plt.axvline(x=xc, color='k', linestyle='--')
-# # ax.set_xticks(rand_temp.index[::39])
-# # ax.set_title(sym_name + " 10-min" + " Intraday volume distribution")
-# # ax.set_xlabel("Time")
-# # ax.set_ylabel("Volume")
-# plt.savefig("volume.png")
-# plt.show()
-
-# df['datetime'] = df['date'] + ' ' + df['time']
-# df['datetime'] = pd.to_datetime(df['date'] + ' ' + df['time'])
-# new = df[['datetime', 'volume']]
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 # %matplotlib inline
 from statsmodels.tsa.exponential_smoothing.ets import ETSModel
 
 austourists = df.volume
+# model = ETSModel(
+#     austourists,
+#     error="multiplicative",
+#     trend="multiplicative",
+#     seasonal="multiplicative",
+#     # damped_trend=True,
+#     seasonal_periods=390)
 model = ETSModel(
     austourists,
-    error="add",
-    trend="add",
-    seasonal="add",
-    damped_trend=True,
-    seasonal_periods=4,
-)
+    error="mul",
+    trend="mul",
+    seasonal="mul",
+    # damped_trend=True,
+    seasonal_periods=390)
 fit = model.fit()
 
+plt.rcParams["figure.figsize"] = (12, 8)
+austourists.plot(label="data")
+fit.fittedvalues.plot(label="statsmodels fit")
+plt.show()
 
 # ===================================== {
 new = df[['Index', 'volume']]
