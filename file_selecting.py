@@ -32,20 +32,13 @@ df = pd.read_csv("symbols.csv",index_col=0)
 sym = df.iloc[:,0].apply(lambda x: x[9:-4])
 
 for j in range(10):
-    print(f">>>>stock {j}  {stock}")
     stock = sym[j]
+    print(f">>>>stock {j}  {stock}")
     datapath = "/data/cholgpu01/not-backed-up/datasets/graf/data/Minutely_LOB_2017-19/"
-    # stock = 'AAPL'
-    # stock = 'AMZN'
     from os import listdir;import pandas as pd;import numpy as np
     dirs = [f for f in listdir(datapath)]
     dirs = sorted(dirs)
     df = pd.DataFrame(dirs)
-    # df = df_dirs[df_dirs.iloc[:,0] >='20210000']
-    # df = df_dirs[df_dirs.iloc[:,0] <='20180000']
-    # df = df_dirs[df_dirs.iloc[:,0]>='20190000']
-    # df = df_dirs[df_dirs.iloc[:,0]<='20190000']
-    # df = df[df.iloc[:,0]>='20180000']
     date = df.iloc[:, 0].values[0]
     file = pd.read_csv(datapath + date + '/' + date +'-'+stock+'.csv')[['timeHMs', 'nrTrades']]
     time_stamp = file.timeHMs.values
@@ -55,27 +48,14 @@ for j in range(10):
         date = df.iloc[:, 0].values[i]
         try:
             file = pd.read_csv(datapath + date + '/' + date + '-'+stock+'.csv')[['timeHMs', 'nrTrades']]
-            # if date in ['20170703', '20171124']:
-            #     file = pd.read_csv(datapath + date + '/' + date + '-'+stock+'.csv')[['timeHMs', 'nrTrades']]
-            #     wrong_stamp = file.timeHMs.values
-            #     diff_stamp = list(set(time_stamp).difference(set(wrong_stamp)))
-            #     adjusted = pd.DataFrame({'timeHMs': diff_stamp, 'nrTrades': np.NaN})
-            #     new = pd.concat([adjusted, file])
-            #     file = new.sort_values("timeHMs").reset_index().drop(['index'], axis=1)
             file['date'] = date
             df_lst.append(file)
-            # print(f"+ date:{date} finished")
         except:
-            # print(f">>>> no stored data on date:{date}")
             pass
 
     dflst = pd.concat(df_lst)
     dflst = dflst.reset_index()
     dflst = dflst.drop('index',axis = 1)
-    # dflst = dflst.drop('index',axis = 1)
-    # dflst.to_csv('apple.csv')
-    # os.makedirs("output")
-    # "/data/cholgpu01/not-backed-up/datasets/graf/data/Minutely_LOB_2017-19/output"
     dflst.to_csv(datapath +'output/'+stock+'.csv')
 
 
@@ -359,3 +339,42 @@ df1 = df.groupby('hour').mean()
 # plt.show()
 df1.nrTrades.plot()
 plt.show()
+
+
+# %%%%%%%%%%%%
+
+import pandas as pd
+from tqdm import tqdm
+df = pd.read_csv("symbols.csv",index_col=0)
+sym = df.iloc[:,0].apply(lambda x: x[9:-4])
+
+for j in (13,90):
+    stock = sym[j]
+    print(f">>>>>>>>>>>>>>> stock {j} {sym[j]}")
+    datapath = "/data/cholgpu01/not-backed-up/datasets/graf/data/Minutely_LOB_2017-19/"
+    from os import listdir;import pandas as pd;import numpy as np
+    dirs = [f for f in listdir(datapath)]
+    dirs = sorted(dirs)
+    df = pd.DataFrame(dirs)
+    date = df.iloc[:, 0].values[0]
+    file = pd.read_csv(datapath + date + '/' + date +'-'+stock+'.csv')[['timeHMs', 'nrTrades']]
+    time_stamp = file.timeHMs.values
+    df_lst = []
+
+    for i in range(len(df)):
+        date = df.iloc[:, 0].values[i]
+        try:
+            file = pd.read_csv(datapath + date + '/' + date + '-'+stock+'.csv')[['timeHMs', 'nrTrades']]
+            file['date'] = date
+            df_lst.append(file)
+        except:
+            pass
+
+    dflst = pd.concat(df_lst)
+    dflst = dflst.reset_index()
+    dflst = dflst.drop('index',axis = 1)
+    dflst.to_csv(datapath +'output/'+stock+'.csv')
+
+
+
+
