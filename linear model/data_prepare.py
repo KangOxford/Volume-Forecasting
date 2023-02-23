@@ -3,30 +3,46 @@ import numpy as np
 
 path = "/Users/kang/Data/"
 data_path = path + "2017/"
+out_path = path + 'out/'
 trading_dates = pd.read_csv(path+"trading_days2017.csv",index_col=0)['0'].apply(str)
 removed_dates = pd.read_csv(path+"removed_days2017.csv",index_col=0)['0'].apply(str)
 dates = pd.DataFrame({'date':list(set(trading_dates.values).difference(set(removed_dates.values)))}).sort_values('date').reset_index().drop('index',axis=1)['date'].apply(str)
 syms = pd.read_csv(path+"symbols.csv",index_col=0)['0'].apply(str)
 i,j = 1,2
-date = dates.iloc[i]
-sym = syms.iloc[j]
+for i in range(len(syms)):
+    sym = syms.iloc[i]
+    print(f">>> stock {i} {sym}")
+    df_list = []
+    for j in range(len(dates)):
+        date = dates.iloc[j]
 
-df = pd.read_csv(data_path+date+'/'+date + '-'+ sym+'.csv')
-df['qty']=df.volBuyQty+df.volSellQty;df['ntn']= df.volSellNotional+df.volBuyNotional;df['ntr']=df.volBuyNrTrades_lit+df.volSellNrTrades_lit;df['date'] = date
-df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']]
+        df = pd.read_csv(data_path+date+'/'+date + '-'+ sym+'.csv')
+        df['qty']=df.volBuyQty+df.volSellQty;df['ntn']= df.volSellNotional+df.volBuyNotional;df['ntr']=df.volBuyNrTrades_lit+df.volSellNrTrades_lit;df['date'] = date
+        df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']]
 
-def resilient_window_mean_nan(sr):
-    # fullfill with the surrounding 4 non-nan values
-    s_ffill = sr.ffill().ffill()
-    s_bfill = sr.bfill().bfill()
-    s_filled = (s_ffill + s_bfill) / 2
-    return s_filled
+        def resilient_window_mean_nan(sr):
+            # fullfill with the surrounding 4 non-nan values
+            s_ffill = sr.ffill().ffill()
+            s_bfill = sr.bfill().bfill()
+            s_filled = (s_ffill + s_bfill) / 2
+            return s_filled
 
-df.iloc[:,4:] = df.iloc[:,4:].apply(resilient_window_mean_nan, axis = 0)
-f = resilient_window_mean_nan(df.qty)
+        df.iloc[:,4:] = df.iloc[:,4:].apply(resilient_window_mean_nan, axis = 0)
+        df_list.append(df)
+    dflst = pd.concat(df_list)
+    dflst.to_csv(out_path+sym+'.csv')
+
+
+
+
+
+
+
+
+
+
 
 df.date = pd.to_datetime(df.date)
-
 gpd = df.set_index('date').groupby(pd.Grouper(freq='D'))
 x_list, y_list = [], []
 for index, data in gpd:
