@@ -17,7 +17,7 @@ from tqdm import tqdm
        'symbol', 'vol', 'jump_value', 'is_jump', 'signed_jump']
 '''
 '''format B
-['symbol', 'date', 'timeHMs', 'timeHMe', 'qty', 'volBuyQty',
+['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty',
        'volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional', 'nrTrades',
        'ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']
 '''
@@ -51,12 +51,8 @@ for i in tqdm(range(len(syms))):
                 s_bfill = sr.bfill().bfill()
                 s_filled = (s_ffill + s_bfill) / 2
                 return s_filled
-            def ffill(sr):
-                s_ffill = sr.ffill()
-                return s_ffill
-            def bfill(sr):
-                s_bfill = sr.bfill()
-                return s_bfill
+            ffill = lambda sr: sr.ffill()
+            bfill = lambda sr: sr.bfill()
             rst = double_fullfill(sr)
             rst = ffill(rst)
             rst = bfill(rst)

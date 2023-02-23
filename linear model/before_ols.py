@@ -1,3 +1,53 @@
+import pandas as pd
+import numpy as np
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+from os import listdir;from os.path import isfile, join
+
+'''1. transfer data format from format A to B'''
+'''2. fulfill nan with the mean of surrounding values'''
+'''3. generate sym.csv with all the dates merged in single csv'''
+
+'''format A
+['Unnamed: 0', 'Unnamed: 0.1', 'Unnamed: 0.1.1', 'timeIndex', 'timeHMs',
+       'timeHMe', 'volBuyQty', 'volBuyNotional', 'volSellQty',
+       'volSellNotional', 'nrTrades', 'volBuyQty_lit', 'volBuyNotional_lit',
+       'volBuyNrTrades_lit', 'volSellQty_lit', 'volSellNotional_lit',
+       'volSellNrTrades_lit', 'volBuyQty_hid', 'volBuyNotional_hid',
+       'volBuyNrTrades_hid', 'volSellQty_hid', 'volSellNotional_hid',
+       'volSellNrTrades_hid', 'bidPx', 'askPx', 'bidQty', 'askQty', 'pret_1m',
+       'symbol', 'vol', 'jump_value', 'is_jump', 'signed_jump']
+'''
+'''format B
+['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty',
+       'volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional', 'nrTrades',
+       'ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']
+'''
+
+path = "/Users/kang/Data/"
+data_path = path + "out/"
+onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path, f))]
+file = onlyfiles[0]
+df = pd.read_csv(data_path + file,index_col=0)
+
+arr = df.groupby('timeHMs')['qty'].mean()
+# plt.scatter(x=np.arange(len(arr)),y=arr)
+plt.plot(arr)
+plt.show()
+
+
+
+trading_dates = pd.read_csv(path+"trading_days2017.csv",index_col=0)['0'].apply(str)
+removed_dates = pd.read_csv(path+"removed_days2017.csv",index_col=0)['0'].apply(str)
+dates = pd.DataFrame({'date':list(set(trading_dates.values).difference(set(removed_dates.values)))}).sort_values('date').reset_index().drop('index',axis=1)['date'].apply(str)
+trading_syms = pd.read_csv(path+"symbols.csv",index_col=0)['0'].apply(str)
+removed_syms = pd.read_csv(path+"removed_syms.csv",index_col=0)['0'].apply(str)
+syms = pd.DataFrame({'syms':list(set(trading_syms.values).difference(set(removed_syms.values)))}).sort_values('syms').reset_index().drop('index',axis=1)['syms'].apply(str)
+
+
+
+
+
 df.date = pd.to_datetime(df.date)
 gpd = df.set_index('date').groupby(pd.Grouper(freq='D'))
 x_list, y_list = [], []
