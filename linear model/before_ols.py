@@ -3,6 +3,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from os import listdir;from os.path import isfile, join
+from sklearn.model_selection import train_test_split
 
 '''1. transfer data format from format A to B'''
 '''2. fulfill nan with the mean of surrounding values'''
@@ -24,16 +25,51 @@ from os import listdir;from os.path import isfile, join
        'ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']
 '''
 
+def ols(train, test):
+    def out_of_sample(results, test):
+        pred_x = test[0]
+        pred_x = sm.add_constant(pred_x, has_constant='add')
+        pred_y = results.predict(pred_x)
+        real_y = test[1]
+        from sklearn.metrics import r2_score
+        r_squared = r2_score(real_y, pred_y)
+        return r_squared
+
+    import statsmodels.api as sm
+    X = train[0]
+    # X = sm.add_constant(X)
+    X = sm.add_constant(X, has_constant='add')
+    Y = train[1]
+    results = sm.OLS(Y, X).fit()
+    print(results.summary())
+    return out_of_sample(results, test)
+
+
 path = "/Users/kang/Data/"
 data_path = path + "out/"
 onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path, f))]
 file = onlyfiles[0]
-df = pd.read_csv(data_path + file,index_col=0)
+df = pd.read_csv(data_path + file, index_col=0)
 
-arr = df.groupby('timeHMs')['qty'].mean()
-# plt.scatter(x=np.arange(len(arr)),y=arr)
-plt.plot(arr)
-plt.show()
+df_list = []
+gpd = df.groupby("date")
+for index, item in gpd:
+    print
+    item['VO'] = item.qty.shift(-1)
+    item = item.dropna()
+    df_list.append(item)
+dflst = pd.DataFrame(pd.concat(df_list))
+
+X = dflst.iloc[:,1:-1]
+X = X[['date',"intrSn","qty","volBuyQty","volSellQty","volBuyNotional","nrTrades"]]
+y = dflst.iloc[:,-1]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=45)
+out_of_sample = ols((X_train, y_train), (X_test, y_test))
+print(f">>> out_of_sample: {out_of_sample}")
+
+
+
+
 
 
 
@@ -43,7 +79,6 @@ dates = pd.DataFrame({'date':list(set(trading_dates.values).difference(set(remov
 trading_syms = pd.read_csv(path+"symbols.csv",index_col=0)['0'].apply(str)
 removed_syms = pd.read_csv(path+"removed_syms.csv",index_col=0)['0'].apply(str)
 syms = pd.DataFrame({'syms':list(set(trading_syms.values).difference(set(removed_syms.values)))}).sort_values('syms').reset_index().drop('index',axis=1)['syms'].apply(str)
-
 
 
 
