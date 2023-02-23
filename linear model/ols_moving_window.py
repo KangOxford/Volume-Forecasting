@@ -10,22 +10,6 @@ from sklearn.metrics import mean_squared_error as mse
 '''2. fulfill nan with the mean of surrounding values'''
 '''3. generate sym.csv with all the dates merged in single csv'''
 
-'''format A
-['Unnamed: 0', 'Unnamed: 0.1', 'Unnamed: 0.1.1', 'timeIndex', 'timeHMs',
-       'timeHMe', 'volBuyQty', 'volBuyNotional', 'volSellQty',
-       'volSellNotional', 'nrTrades', 'volBuyQty_lit', 'volBuyNotional_lit',
-       'volBuyNrTrades_lit', 'volSellQty_lit', 'volSellNotional_lit',
-       'volSellNrTrades_lit', 'volBuyQty_hid', 'volBuyNotional_hid',
-       'volBuyNrTrades_hid', 'volSellQty_hid', 'volSellNotional_hid',
-       'volSellNrTrades_hid', 'bidPx', 'askPx', 'bidQty', 'askQty', 'pret_1m',
-       'symbol', 'vol', 'jump_value', 'is_jump', 'signed_jump']
-'''
-'''format B
-['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty',
-       'volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional', 'nrTrades',
-       'ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']
-'''
-
 def ols(train, test):
     def out_of_sample(results, test):
         pred_x = test[0]
