@@ -3,8 +3,9 @@ import numpy as np
 
 path = "/Users/kang/Data/"
 data_path = path + "2017/"
-dates = pd.read_csv(path+"trading_days2017.csv",index_col=0).sort_values("0")
-dates.reset_index().iloc[1:,1].to_csv(path+"trading_days2017.csv")
+dates = pd.read_csv(path+"trading_days2017.csv",index_col=0)
+syms = pd.read_csv(path+"symbols.csv",index_col=0)['0'].apply(lambda x:x[9:-4]).to_csv(path+"symbols.csv")
+date = dates[0]
 sym = "AAPL"
 
 df = pd.read_csv(data_path+date+'/'+date + '-'+ sym+'.csv')[['timeIndex', 'timeHMs', 'timeHMe', 'volBuyQty', 'volBuyNotional',
