@@ -22,15 +22,8 @@ def resilient_window_mean_nan(sr):
     s_filled = (s_ffill + s_bfill) / 2
     return s_filled
 
-df.apply(resilient_window_mean_nan, axis = 1)
+df.iloc[:,4:] = df.iloc[:,4:].apply(resilient_window_mean_nan, axis = 0)
 f = resilient_window_mean_nan(df.qty)
-import matplotlib.pyplot as plt
-plt.rcParams['figure.dpi'] = 300
-plt.rcParams['savefig.dpi'] = 300
-plt.plot(f.values)
-plt.plot(df.qty.values)
-# plt.savefig('qty_fullfill.png')
-plt.show()
 
 df.date = pd.to_datetime(df.date)
 
