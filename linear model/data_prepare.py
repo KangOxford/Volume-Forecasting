@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 path = "/Users/kang/Data/"
 data_path = path + "2017/"
@@ -8,8 +9,7 @@ trading_dates = pd.read_csv(path+"trading_days2017.csv",index_col=0)['0'].apply(
 removed_dates = pd.read_csv(path+"removed_days2017.csv",index_col=0)['0'].apply(str)
 dates = pd.DataFrame({'date':list(set(trading_dates.values).difference(set(removed_dates.values)))}).sort_values('date').reset_index().drop('index',axis=1)['date'].apply(str)
 syms = pd.read_csv(path+"symbols.csv",index_col=0)['0'].apply(str)
-i,j = 1,2
-for i in range(len(syms)):
+for i in tqdm(range(len(syms))):
     sym = syms.iloc[i]
     print(f">>> stock {i} {sym}")
     df_list = []
