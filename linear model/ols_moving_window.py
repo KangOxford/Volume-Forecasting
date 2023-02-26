@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from os import listdir;from os.path import isfile, join
 import statsmodels.api as sm
 from sklearn.metrics import mean_squared_error as mse
-plt.rcParams["figure.figsize"] = (40,20)
+# plt.rcParams["figure.figsize"] = (40,20)
 
 '''1. transfer data format from format A to B'''
 '''2. fulfill nan with the mean of surrounding values'''
