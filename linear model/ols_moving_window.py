@@ -31,26 +31,28 @@ def ols(train, test):
     return out_of_sample(results, test)
 
 '''on mac'''
-# path = "/Users/kang/Data/"
-# # data_path = path + "out/"
-# data_path = path + "out_jump/"
-# out_path = path + 'out_ols/'
+path = "/Users/kang/Data/"
+data_path = path + "out_jump/"
+out_path = path + 'out_ols/'
 '''on stats'''
 # path = "/data/cholgpu01/not-backed-up/datasets/graf/data/"
 # data_path = path + "out_jump/"
 '''on linux'''
-path = "/home/kanli/forth/"
-data_path = path + "out_jump/"
-out_path = path + 'out_ols/'
+# path = "/home/kanli/forth/"
+# data_path = path + "out_jump/"
+# out_path = path + 'out_ols/'
 
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
 already_done = sorted([f for f in listdir(out_path) if isfile(join(out_path, f))])
 
 result_lst = []
-# for j in tqdm(range(len(onlyfiles))): # on mac
-# for j in tqdm(range(len(onlyfiles))): # on linux
-# for j in tqdm(range(300,-1,-1)): # on linux
-for j in tqdm(range(300,-1,-1)): # on linux
+# for j in tqdm(range(1,100)): # on linux1
+# for j in tqdm(range(100,200)): # on linux2
+# for j in tqdm(range(200,300)): # on linux3
+# for j in tqdm(range(300,400)): # on mac1
+# for j in tqdm(range(400,498)): # on mac2
+# for j in tqdm(range(497,399,-1)): # on mac3
+for j in tqdm(range(399,299,-1)): # on mac4
     file = onlyfiles[j]
     if file in already_done:
         continue
