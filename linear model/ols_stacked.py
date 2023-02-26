@@ -46,7 +46,8 @@ def ols(train, test):
 
 
 path = "/Users/kang/Data/"
-data_path = path + "out/"
+# data_path = path + "out/"
+data_path = path + "out_jump/"
 onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path, f))]
 file = onlyfiles[0]
 df = pd.read_csv(data_path + file, index_col=0)
@@ -61,11 +62,26 @@ for index, item in gpd:
 dflst = pd.DataFrame(pd.concat(df_list))
 
 X = dflst.iloc[:,1:-1]
-X = X[['date',"intrSn","qty","volBuyQty","volSellQty","volBuyNotional","nrTrades"]]
+X = X[['date',"intrSn","qty","volBuyQty","volSellQty","volBuyNotional","nrTrades","is_jump"]]
+# X = X[['date',"intrSn","qty","volBuyQty","volSellQty","volBuyNotional","nrTrades"]]
 y = dflst.iloc[:,-1]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=45)
-out_of_sample = ols((X_train, y_train), (X_test, y_test))
-print(f">>> out_of_sample: {out_of_sample}")
+
+oos_lst = []
+for state in range(100):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=state)
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+    out_of_sample = ols((X_train, y_train), (X_test, y_test))
+    print(f">>> out_of_sample: {out_of_sample}")
+    oos_lst.append(out_of_sample)
+np.mean(oos_lst)
+
+
+
+
+
+
+
+
 
 
 

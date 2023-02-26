@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="kanli@stats2837.local:22 (3)" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="kanli@stats2837.local:22 (5)" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
       <paths name="kanli@gate.stats.ox.ac.uk:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/homes/kanli/Volume-Forecasting" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="kanli@gate.stats.ox.ac.uk:22 (2)">
         <serverdata>
           <mappings>
             <mapping deploy="/homes/kanli/Volume-Forecasting" local="$PROJECT_DIR$" />
@@ -20,6 +27,20 @@
         <serverdata>
           <mappings>
             <mapping deploy="/home/kanli/Volume-Forecasting" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="kanli@stats2837.local:22 (4)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/kanli/forth" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="kanli@stats2837.local:22 (5)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/kanli/forth" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

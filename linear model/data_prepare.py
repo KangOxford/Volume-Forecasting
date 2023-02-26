@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+import warnings;warnings.simplefilter("ignore", category=FutureWarning)
+from os import listdir;from os.path import isfile, join
 
 '''1. transfer data format from format A to B'''
 '''2. fulfill nan with the mean of surrounding values'''
@@ -21,16 +23,24 @@ from tqdm import tqdm
        'volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional', 'nrTrades',
        'ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']
 '''
-
+'''on mac'''
 path = "/Users/kang/Data/"
 data_path = path + "2017/"
-out_path = path + 'out/'
+# out_path = path + 'out/'
+out_path = path + 'out_jump/'
+# '''on linux'''
+# path = "/data/cholgpu01/not-backed-up/datasets/graf/data/"
+# data_path = path + "Minutely_LOB_2017-19/"
+# out_path = path + 'out_jump/'
+
 trading_dates = pd.read_csv(path+"trading_days2017.csv",index_col=0)['0'].apply(str)
 removed_dates = pd.read_csv(path+"removed_days2017.csv",index_col=0)['0'].apply(str)
 dates = pd.DataFrame({'date':list(set(trading_dates.values).difference(set(removed_dates.values)))}).sort_values('date').reset_index().drop('index',axis=1)['date'].apply(str)
 trading_syms = pd.read_csv(path+"symbols.csv",index_col=0)['0'].apply(str)
 removed_syms = pd.read_csv(path+"removed_syms.csv",index_col=0)['0'].apply(str)
 syms = pd.DataFrame({'syms':list(set(trading_syms.values).difference(set(removed_syms.values)))}).sort_values('syms').reset_index().drop('index',axis=1)['syms'].apply(str)
+already_done = [f[:-4] for f in listdir(out_path) if isfile(join(out_path, f))]
+
 
 for i in tqdm(range(len(syms))):
     sym = syms.iloc[i]
@@ -42,7 +52,8 @@ for i in tqdm(range(len(syms))):
         df = pd.read_csv(data_path+date+'/'+date + '-'+ sym+'.csv')
         df['qty']=df.volBuyQty+df.volSellQty;df['ntn']= df.volSellNotional+df.volBuyNotional;df['ntr']=df.volBuyNrTrades_lit+df.volSellNrTrades_lit;df['date'] = date
         df['intrSn'] = df.timeHMs.apply(lambda x: 0 if x< 1000 else( 2 if x>=1530 else 1))
-        df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']]
+        # df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']]
+        df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit', 'jump_value', 'is_jump', 'signed_jump']]
 
         def resilient_window_mean_nan(sr):
             def double_fullfill(sr):

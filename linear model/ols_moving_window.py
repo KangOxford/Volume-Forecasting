@@ -3,8 +3,9 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from os import listdir;from os.path import isfile, join
-import statsmodels.api as s
+import statsmodels.api as sm
 from sklearn.metrics import mean_squared_error as mse
+plt.rcParams["figure.figsize"] = (40,20)
 
 '''1. transfer data format from format A to B'''
 '''2. fulfill nan with the mean of surrounding values'''
@@ -29,41 +30,83 @@ def ols(train, test):
     print(results.summary())
     return out_of_sample(results, test)
 
+'''on mac'''
+# path = "/Users/kang/Data/"
+# # data_path = path + "out/"
+# data_path = path + "out_jump/"
+# out_path = path + 'out_ols/'
+'''on stats'''
+# path = "/data/cholgpu01/not-backed-up/datasets/graf/data/"
+# data_path = path + "out_jump/"
+'''on linux'''
+path = "/home/kanli/forth/"
+data_path = path + "out_jump/"
+out_path = path + 'out_ols/'
 
-path = "/Users/kang/Data/"
-data_path = path + "out/"
-onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path, f))]
-file = onlyfiles[0]
-df = pd.read_csv(data_path + file, index_col=0)
+onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
+already_done = sorted([f for f in listdir(out_path) if isfile(join(out_path, f))])
 
-df_list = []
-gpd = df.groupby("date")
-for index, item in gpd:
-    print
-    item['VO'] = item.qty.shift(-1)
-    item = item.dropna()
-    df_list.append(item)
-dflst = pd.DataFrame(pd.concat(df_list))
+result_lst = []
+# for j in tqdm(range(len(onlyfiles))): # on mac
+# for j in tqdm(range(len(onlyfiles))): # on linux
+# for j in tqdm(range(300,-1,-1)): # on linux
+for j in tqdm(range(300,-1,-1)): # on linux
+    file = onlyfiles[j]
+    if file in already_done:
+        continue
+    print(f">>>> {j}th {file}")
+    df = pd.read_csv(data_path + file, index_col=0)
 
-X0 = dflst.iloc[:,1:-1]
-X0 = X0[['date',"intrSn","qty","volBuyQty","volSellQty","volBuyNotional","nrTrades"]]
-y0 = dflst.iloc[:,-1]
+    df_list = []
+    gpd = df.groupby("date")
+    for index, item in gpd:
+        item['VO'] = item.qty.shift(-1)
+        item = item.dropna()
+        df_list.append(item)
+    dflst = pd.DataFrame(pd.concat(df_list))
 
-window_size = 3900
-rst_lst = []
-for index in range(window_size, X0.shape[0]):
-    print(index)
-    X = X0.iloc[index-window_size:index,:]
-    y = y0.iloc[index-window_size:index]
-    X = sm.add_constant(X, has_constant='add')
-    results = sm.OLS(y, X).fit()
-    y_hat = results.predict([1] +list(X0.iloc[index,:]))
-    y_true = y0.iloc[index]
-    rst_lst.append([y_true, y_hat])
-rst = pd.DataFrame(rst_lst)
-rst.iloc[:,-1] = rst.iloc[:,-1].apply(lambda x:x[0])
+    X0 = dflst.iloc[:,1:-1]
+    X0 = X0[['date',"intrSn","qty","volBuyQty","volSellQty","volBuyNotional","nrTrades","is_jump"]]
+    y0 = dflst.iloc[:,-1]
 
-# plt.plot(rst.iloc[:,0])
-# plt.plot(rst.iloc[:,1])
+    window_size = 3900
+    rst_lst = []
+    for index in tqdm(range(window_size, X0.shape[0]), leave=False):
+    # for index in range(window_size, X0.shape[0]):
+        # print(index)
+        X = X0.iloc[index-window_size:index,:]
+        y = y0.iloc[index-window_size:index]
+        X = sm.add_constant(X, has_constant='add')
+        results = sm.OLS(y, X).fit()
+        y_hat = results.predict([1] +list(X0.iloc[index,:]))
+        y_true = y0.iloc[index]
+        rst_lst.append([y_true, y_hat])
+
+
+    rst = pd.DataFrame(rst_lst)
+    rst.iloc[:,-1] = rst.iloc[:,-1].apply(lambda x:x[0])
+    rst.columns = ["yTrue","yPred"]
+
+    result = pd.concat([dflst.iloc[window_size:,[0,1,2,3]].reset_index().drop('index',axis=1), rst],axis=1)
+    result.to_csv(out_path + file)
+
+
+#     result_lst.append(result)
+#
+#
+# df = pd.concat(result_lst)
+# df.to_csv(path + "ols_mw.csv")
+
+
+
+
+
+
+
+
+
+
+# plt.plot(rst.iloc[:1000,0])
+# plt.plot(rst.iloc[:1000,1])
 # plt.show()
 # mse(rst.iloc[:,0], rst.iloc[:,1])
