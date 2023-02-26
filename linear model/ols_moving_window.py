@@ -27,7 +27,6 @@ def ols(train, test):
     X = sm.add_constant(X, has_constant='add')
     Y = train[1]
     results = sm.OLS(Y, X).fit()
-    print(results.summary())
     return out_of_sample(results, test)
 
 '''on mac'''
