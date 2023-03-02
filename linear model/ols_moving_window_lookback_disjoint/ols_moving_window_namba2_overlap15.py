@@ -4,11 +4,9 @@ from tqdm import tqdm
 from os import listdir;from os.path import isfile, join
 from numba import jit
 
-import scipy
-
 '''on linux'''
-# path = "/home/kanli/forth/"
-path = "~/"
+path = "/home/kanli/forth/"
+# path = "/homes/80/kang/"
 
 
 data_path = path + "out_overlap15/"
@@ -35,8 +33,8 @@ lst15 = ['timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty', 'volSellQty', 'ntn'
 for j in tqdm(range(len(onlyfiles))): # on mac4
     # j = 0#$
     file = onlyfiles[j]
-    # if file in already_done:
-    #     continue
+    if file in already_done:
+        continue
     print(f">>>> {j}th {file}")
     df = pd.read_pickle(data_path + file)
 
