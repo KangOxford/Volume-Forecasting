@@ -24,8 +24,8 @@ def ols(train, test):
     return results, out_of_sample(results, test)
 
 path = "/home/kanli/forth/"
-# data_path = path + "out_overlap5/"
-data_path = path + "out_overlap15/"
+data_path = path + "out_overlap5/"
+# data_path = path + "out_overlap15/"
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
 # for i in tqdm(range(len(onlyfiles))):
 file = onlyfiles[0]
@@ -95,5 +95,32 @@ plt.legend(fontsize=20);
 plt.show()
 
 columns_df  = pd.DataFrame(columns_list)
-
+rows = columns_df.apply(lambda row: str(row.values), axis=1)
+row_counts = rows.groupby(rows).size().to_dict()
+sorted_dict = dict(sorted(row_counts.items(), key=lambda x: (x[1], x[0]), reverse=True))
+first_pair = next(iter(sorted_dict.items()), None)
+first_key = first_pair[0]
+import re
+lst = re.findall(r'\w+', first_key)
+lst = [x for x in lst if x != 'None']
+lst5 = ['timeHMs',
+         'timeHMe',
+         'intrSn',
+         'qty',
+         'volBuyQty',
+         'volSellQty',
+         'ntn',
+         'volSellNotional',
+         'ntr',
+         'volBuyNrTrades_lit',
+         'volSellNrTrades_lit',
+         'ol_lb5_qty',
+         'ol_lb5_volBuyQty',
+         'ol_lb5_volSellQty',
+         'ol_lb5_ntn',
+         'ol_lb5_volSellNotional',
+         'ol_lb5_nrTrades',
+         'jump_value',
+         'is_jump']
+lst15 = ['timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty', 'volSellQty', 'ntn', 'volSellNotional', 'volBuyNrTrades_lit', 'ol_lb5_qty', 'ol_lb5_volSellQty', 'ol_lb5_ntn', 'ol_lb5_volSellNotional', 'ol_lb15_volSellQty', 'ol_lb15_ntn', 'ol_lb15_volBuyNotional', 'ol_lb15_nrTrades', 'ol_lb15_ntr', 'jump_value', 'is_jump']
 
