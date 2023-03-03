@@ -24,8 +24,8 @@ def ols(train, test):
     return results, out_of_sample(results, test)
 
 path = "/home/kanli/forth/"
-data_path = path + "out_overlap5/"
-# data_path = path + "out_overlap15/"
+# data_path = path + "out_disjoint5/"
+data_path = path + "out_disjoint15/"
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
 # for i in tqdm(range(len(onlyfiles))):
 file = onlyfiles[0]
@@ -92,7 +92,9 @@ plt.plot(oos_lst[window_size:],label='OUT OF SAMPLE R_SQUARED')
 plt.plot(moving_avg,label='AVERAGED_OUT OF SAMPLE R_SQUARED', linewidth=4)
 plt.xticks(fontsize=20);plt.yticks(fontsize=20);
 plt.legend(fontsize=20);
-plt.show()
+# plt.savefig(path+"out_disjoint5.png")
+plt.savefig(path+"out_disjoint15.png")
+# plt.show()
 
 columns_df  = pd.DataFrame(columns_list)
 rows = columns_df.apply(lambda row: str(row.values), axis=1)
@@ -103,6 +105,62 @@ first_key = first_pair[0]
 import re
 lst = re.findall(r'\w+', first_key)
 lst = [x for x in lst if x != 'None']
+
+
+'''disjoint'''
+lst5 = ['timeHMs',
+ 'timeHMe',
+ 'intrSn',
+ 'qty',
+ 'volSellQty',
+ 'ntn',
+ 'volBuyNotional',
+ 'volSellNotional',
+ 'nrTrades',
+ 'ntr',
+ 'volBuyNrTrades_lit',
+ 'volSellNrTrades_lit',
+ 'ol_lb5_qty',
+ 'ol_lb5_volSellQty',
+ 'ol_lb5_ntn',
+ 'ol_lb5_volBuyNotional',
+ 'ol_lb5_volSellNotional',
+ 'ol_lb5_nrTrades',
+ 'ol_lb5_ntr',
+ 'jump_value',
+ 'is_jump']
+
+lst15 = ['timeHMs',
+ 'timeHMe',
+ 'intrSn',
+ 'qty',
+ 'volBuyQty',
+ 'volSellQty',
+ 'ntn',
+ 'volBuyNotional',
+ 'volSellNotional',
+ 'ntr',
+ 'volBuyNrTrades_lit',
+ 'volSellNrTrades_lit',
+ 'ol_lb5_qty',
+ 'ol_lb5_volBuyQty',
+ 'ol_lb5_volSellQty',
+ 'ol_lb5_ntn',
+ 'ol_lb5_volSellNotional',
+ 'ol_lb5_volSellNrTrades_lit',
+ 'ol_lb15_qty',
+ 'ol_lb15_volBuyQty',
+ 'ol_lb15_volSellQty',
+ 'ol_lb15_ntn',
+ 'ol_lb15_volBuyNotional',
+ 'ol_lb15_volSellNotional',
+ 'ol_lb15_nrTrades',
+ 'ol_lb15_volBuyNrTrades_lit',
+ 'ol_lb15_volSellNrTrades_lit',
+ 'is_jump']
+
+
+'''overlap'''
 lst5 = ['timeHMs',
          'timeHMe',
          'intrSn',

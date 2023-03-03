@@ -25,11 +25,12 @@ import warnings;warnings.simplefilter("ignore", category=FutureWarning)
 
 path = "/home/kanli/forth/"
 data_path = path + "out_jump/"
-out_path = path + "out_overlap15/"
+out_path = path + "out_disjoint15/"
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
 
 
 for i in tqdm(range(len(onlyfiles))):
+    # i = 1 #$
     file = onlyfiles[i]
     df = pd.read_csv(data_path + file, index_col=0)
     df_list = []
@@ -40,21 +41,23 @@ for i in tqdm(range(len(onlyfiles))):
         df_list.append(item)
     dflst = pd.DataFrame(pd.concat(df_list))
 
-    lb_size_list = [5,15]
+    lb_size_list = [1,5,15]
     append_part_list = []
-    for lb_size in lb_size_list:
-        lookback_5 = dflst.rolling(lb_size).sum()
-        lookback_5 = dflst.rolling(lb_size,min_periods=1).sum()
-        # lookback_5.iloc[lb_size-1:,4:14]/=5
+    for i in range(len(lb_size_list)-1):
+        # i = 1 #$
+        # i = 0 #$
+        lb_size = lb_size_list[i+1]
+        lookback_5 = dflst.shift(sum(lb_size_list[:i+1])).rolling(lb_size,min_periods=1).sum()
 
         lookback_5 /= lb_size
-        for i in range(lb_size-1):
-            lookback_5.iloc[i,:] *= lb_size/(i+1)
+        for j in range(sum(lb_size_list[:i+1]),sum(lb_size_list[:i+1])+lb_size-1):
+            lookback_5.iloc[j,:] *= lb_size/(j-sum(lb_size_list[:i+1])+1)
         append_part = lookback_5.iloc[:,4:14]
         append_part.columns = ["ol_lb"+str(lb_size)+"_"+ col for col in append_part.columns]
         append_part_list.append(append_part)
 
     appended = pd.concat([dflst.iloc[:,:-4], append_part_list[0], append_part_list[1], dflst.iloc[:,-4:]],axis=1)
+    appended = appended.dropna(axis=0)
     try:
         appended.to_pickle(out_path + file[:-4] + '.pkl')
     except:

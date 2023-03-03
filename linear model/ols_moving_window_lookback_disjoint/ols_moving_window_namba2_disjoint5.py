@@ -8,8 +8,8 @@ import scipy
 
 '''on linux'''
 path = "/home/kanli/forth/"
-data_path = path + "out_overlap5/"
-out_path = path + 'out_ols_overlap5_numba/'
+data_path = path + "out_disjoint5/"
+out_path = path + 'out_disjoint5_numba/'
 # data_path = path + "out_overlap15/"
 # out_path = path + 'out_ols_overlap15_numba/'
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
@@ -28,26 +28,30 @@ def ols(X, y):
     beta = XT_X_pinv @ X.T @ y
     return beta
 
+'''disjoint'''
 lst5 = ['timeHMs',
-         'timeHMe',
-         'intrSn',
-         'qty',
-         'volBuyQty',
-         'volSellQty',
-         'ntn',
-         'volSellNotional',
-         'ntr',
-         'volBuyNrTrades_lit',
-         'volSellNrTrades_lit',
-         'ol_lb5_qty',
-         'ol_lb5_volBuyQty',
-         'ol_lb5_volSellQty',
-         'ol_lb5_ntn',
-         'ol_lb5_volSellNotional',
-         'ol_lb5_nrTrades',
-         'jump_value',
-         'is_jump']
-lst15 = ['timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty', 'volSellQty', 'ntn', 'volSellNotional', 'volBuyNrTrades_lit', 'ol_lb5_qty', 'ol_lb5_volSellQty', 'ol_lb5_ntn', 'ol_lb5_volSellNotional', 'ol_lb15_volSellQty', 'ol_lb15_ntn', 'ol_lb15_volBuyNotional', 'ol_lb15_nrTrades', 'ol_lb15_ntr', 'jump_value', 'is_jump']
+ 'timeHMe',
+ 'intrSn',
+ 'qty',
+ 'volSellQty',
+ 'ntn',
+ 'volBuyNotional',
+ 'volSellNotional',
+ 'nrTrades',
+ 'ntr',
+ 'volBuyNrTrades_lit',
+ 'volSellNrTrades_lit',
+ 'ol_lb5_qty',
+ 'ol_lb5_volSellQty',
+ 'ol_lb5_ntn',
+ 'ol_lb5_volBuyNotional',
+ 'ol_lb5_volSellNotional',
+ 'ol_lb5_nrTrades',
+ 'ol_lb5_ntr',
+ 'jump_value',
+ 'is_jump']
+
+
 
 
 for j in tqdm(range(len(onlyfiles))): # on mac4

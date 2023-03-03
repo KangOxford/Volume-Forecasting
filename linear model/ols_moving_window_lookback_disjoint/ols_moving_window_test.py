@@ -1,46 +1,63 @@
-import math, time, typing
+import pandas as pd
+from os import listdir;from os.path import isfile, join
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt; plt.rcParams["figure.figsize"] = (10,6)
 
-def donut(x: float, y: float, z: float) -> float:
-  radius = 0.4
-  thickness = 0.3
-  return math.sqrt((math.sqrt(x**2 + y**2) - radius)**2 + z**2) - thickness / 2
+'''transform'''
+path = "/home/kanli/forth/";
+data_path = path + "out_disjoint5_numba/"
+# data_path = path + "out_ols_disjoint1
+#
+#
+#
+# 5_numba/"
+onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
+df_lst = pd.concat(map(lambda file: pd.read_pickle(data_path + file), onlyfiles))
+# groupby date /option 01
+mean_date = df_lst.groupby('date').mean()
+mse_date = df_lst.groupby('date').apply(lambda x: mean_squared_error(x['yTrue'],x['yPred']))
+# groupby date and time /option 02
+df_lst['date_time'] = df_lst.date.apply(str) + df_lst.timeHMs.apply(lambda x: str(x).zfill(4))
+mean_date_time = df_lst.groupby('date_time').mean()
+mse_date_time = df_lst.groupby('date_time').apply(lambda x: mean_squared_error(x['yTrue'],x['yPred']))
 
-Sdf = typing.Callable[[float, float, float], float]
-def normal(sdf: Sdf, x: float, y: float, z: float) -> tuple[float, float, float]:
-  ε = 0.001
-  n_x = sdf(x + ε, y, z) - sdf(x - ε, y, z)
-  n_y = sdf(x, y + ε, z) - sdf(x, y - ε, z)
-  n_z = sdf(x, y, z + ε) - sdf(x, y, z - ε)
-  norm = math.sqrt(n_x**2 + n_y**2 + n_z**2)
-  return (n_x / norm, n_y / norm, n_z / norm)
+'''anomaly handling'''
+mse_date_gpd = df_lst.groupby('date_time')
+anomaly_sample = mse_date_gpd.get_group('201707251537')
 
-def sample(x: float, y: float) -> str:
-  z = -10
-  for _step in range(30):
-    θ = time.time() * 2
-    t_x = x * math.cos(θ) - z * math.sin(θ)
-    t_z = x * math.sin(θ) + z * math.cos(θ)
-    d = donut(t_x, y, t_z)
-    if d <= 0.01:
-      _, nt_y, nt_z = normal(donut, t_x, y, t_z)
-      is_lit = nt_y < -0.15
-      is_frosted = nt_z < -0.5
+'''plot'''
+# groupby date /option 01
+plt.plot(mean_date.yTrue.values,label='True');plt.plot(mean_date.yPred.values,label='Pred')
+# plt.xticks(fontsize=20);plt.yticks(fontsize=20);
+plt.legend();
+# plt.legend(fontsize=20);
+plt.show()
 
-      if is_frosted:
-        return '@' if is_lit else '#'
-      else:
-        return '=' if is_lit else '.'
-    else:
-      z += d
-  return ' '
+plt.plot(mse_date.values,label="MSE");
+# plt.xticks(fontsize=20);plt.yticks(fontsize=20);
+# plt.legend(fontsize=20);
+plt.legend();
+plt.show()
 
-while True:
-  frame_chars = []
-  for y in range(20):
-    for x in range(80):
-      remapped_x = x / 80 * 2 - 1
-      remapped_y = (y / 20 * 2 - 1) * (2 * 20/80)
-      frame_chars.append(sample(remapped_x, remapped_y))
-    frame_chars.append('\n')
-  print('\033[2J' + ''.join(frame_chars))
-  time.sleep(1/30)
+# groupby date and time /option 02
+plt.plot(mean_date_time.yTrue.values,label='True');plt.plot(mean_date_time.yPred.values,label='Pred')
+plt.xticks(fontsize=20);plt.yticks(fontsize=20);
+# plt.legend();
+plt.title("ols_disjoint5_yTrue_&_yPred")
+plt.legend(fontsize=20);
+plt.show()
+
+plt.plot(mse_date_time.values,label="MSE");
+plt.xticks(fontsize=20);plt.yticks(fontsize=20);
+plt.legend(fontsize=20);
+plt.title("ols_disjoint5_MSE")
+# plt.legend();
+plt.show()
+
+# anomaly /option 03
+plt.plot(anomaly_sample.yTrue.values,label='True');plt.plot(anomaly_sample.yPred.values,label='Pred')
+plt.xticks(fontsize=20);plt.yticks(fontsize=20);
+plt.legend(fontsize=20);
+plt.show()
+
+
