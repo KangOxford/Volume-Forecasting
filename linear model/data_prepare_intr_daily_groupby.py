@@ -28,19 +28,50 @@ import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
     path = "/Users/kang/Desktop/Volume-Forecasting/"
-    data_path = path + "2017/"
-    # out_path = path + 'out/'
-    out_path = path + 'out_jump/'
+    data_path = path + "out_jump/"
+    out_path = path + "out_disjoint5/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
     # '''on server'''
-    path = "/data/cholgpu01/not-backed-up/datasets/graf/data/"
-    data_path = path + "Minutely_LOB_2017-19/"
-    out_path = path + 'out_jump/'
+    path = "/home/kanli/forth/"
+    data_path = path + "out_jump/"
+    out_path = path + "out_disjoint5/"
 else:print("Unknown operating system")
 
+'''New Added'''
+onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
+for i in tqdm(range(len(onlyfiles))):
+    file = onlyfiles[i]
+    df = pd.read_csv(data_path + file, index_col=0)
+    df_list = []
+    gpd = df.groupby("date")
+    for index, item in gpd:
+        item['VO'] = item.qty.shift(-1)
+        item = item.dropna()
+        df_list.append(item)
+    dflst = pd.DataFrame(pd.concat(df_list))
+
+    # overlapped_lookback_window {
+    lb_size = 5
+    lookback_5 = dflst.shift(1).rolling(lb_size,min_periods=1).sum()
+    # lookback_5.iloc[lb_size-1:,4:14]/=5
+    lookback_5 /= lb_size
+    for i in range(1,lb_size):
+        lookback_5.iloc[i,:] *= lb_size/i
+    # overlapped_lookback_window }
 
 
+    append_part = lookback_5.iloc[:,4:14]
+    append_part.columns = ["ol_lb5_"+ col for col in append_part.columns]
+
+    appended = pd.concat([dflst.iloc[:,:-4], append_part, dflst.iloc[:,-4:]],axis=1)
+    appended = appended.dropna(axis=0)
+    try:
+        appended.to_pickle(out_path + file[:-4] + '.pkl')
+    except:
+        import os;os.mkdir(out_path)
+        appended.to_pickle(out_path + file[:-4] + '.pkl')
+'''New Added'''
 
 trading_dates = pd.read_csv(path+"trading_days2017.csv",index_col=0)['0'].apply(str)
 removed_dates = pd.read_csv(path+"removed_days2017.csv",index_col=0)['0'].apply(str)
