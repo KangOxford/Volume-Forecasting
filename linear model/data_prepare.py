@@ -27,16 +27,16 @@ from os import listdir;from os.path import isfile, join
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "/Users/kang/Desktop/Volume-Forecasting/"
+    path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "2017/"
     # out_path = path + 'out/'
-    out_path = path + 'out_jump/'
+    out_path = path + 'raw/'
 elif platform.system() == 'Linux':
     print("Running on Linux")
-    # '''on server'''
-    path = "/data/cholgpu01/not-backed-up/datasets/graf/data/"
-    data_path = path + "Minutely_LOB_2017-19/"
-    out_path = path + 'out_jump/'
+    # # '''on server'''
+    # path = "/data/cholgpu01/not-backed-up/datasets/graf/data/"
+    # data_path = path + "Minutely_LOB_2017-19/"
+    # out_path = path + 'out_jump/'
 else:print("Unknown operating system")
 
 
@@ -64,7 +64,7 @@ for i in tqdm(range(len(syms))):
         df['qty']=df.volBuyQty+df.volSellQty;df['ntn']= df.volSellNotional+df.volBuyNotional;df['ntr']=df.volBuyNrTrades_lit+df.volSellNrTrades_lit;df['date'] = date
         df['intrSn'] = df.timeHMs.apply(lambda x: 0 if x< 1000 else( 2 if x>=1530 else 1))
         # df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']]
-        df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit', 'jump_value', 'is_jump', 'signed_jump']]
+        df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit', 'jump_value', 'is_jump', 'signed_jump', 'volBuyQty','volSellQty','qty']]
 
         def resilient_window_mean_nan(sr):
             def double_fullfill(sr):
@@ -81,9 +81,10 @@ for i in tqdm(range(len(syms))):
             return rst
 
         df.iloc[:,5:] = df.iloc[:,5:].apply(resilient_window_mean_nan, axis = 0)
+        df["VO"] = df.qty.shift(-1)
         df_list.append(df)
     dflst = pd.concat(df_list)
-    dflst.to_csv(out_path+sym+'.csv')
+    dflst.to_pickle(out_path+sym+'.pkl')
 
 
 
