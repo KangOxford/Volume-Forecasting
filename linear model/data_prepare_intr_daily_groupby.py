@@ -27,29 +27,29 @@ from os import listdir;from os.path import isfile, join
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "/Users/kang/Desktop/Volume-Forecasting/"
-    data_path = path + "out_jump/"
-    out_path = path + "out_disjoint5/"
+    path = "/Users/kang/Volume-Forecasting/"
+    data_path = path + "raw/"
+    out_path = path + "raw_component/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
     # '''on server'''
-    path = "/home/kanli/forth/"
-    data_path = path + "out_jump/"
-    out_path = path + "out_disjoint5/"
+    # path = "/home/kanli/forth/"
+    # data_path = path + "out_jump/"
+    # out_path = path + "out_disjoint5/"
 else:print("Unknown operating system")
 
 '''New Added'''
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
 for i in tqdm(range(len(onlyfiles))):
     file = onlyfiles[i]
-    df = pd.read_csv(data_path + file, index_col=0)
-    df_list = []
+    df = pd.read_pickle(data_path + file)
+
+    # df_list = []
     gpd = df.groupby("date")
-    for index, item in gpd:
-        item['VO'] = item.qty.shift(-1)
-        item = item.dropna()
-        df_list.append(item)
-    dflst = pd.DataFrame(pd.concat(df_list))
+    igpd = iter(gpd)
+    for j in range(len(gpd)):
+        index, item = next(igpd)
+
 
     # overlapped_lookback_window {
     lb_size = 5
