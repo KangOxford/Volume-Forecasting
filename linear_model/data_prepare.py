@@ -63,7 +63,6 @@ for i in tqdm(range(len(syms))):
         df = pd.read_csv(data_path+date+'/'+date + '-'+ sym+'.csv')
         df['qty']=df.volBuyQty+df.volSellQty;df['ntn']= df.volSellNotional+df.volBuyNotional;df['ntr']=df.volBuyNrTrades_lit+df.volSellNrTrades_lit;df['date'] = date
         df['intrSn'] = df.timeHMs.apply(lambda x: 0 if x< 1000 else( 2 if x>=1530 else 1))
-        # df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']]
         df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit', 'jump_value', 'is_jump', 'signed_jump', 'volBuyQty','volSellQty','qty']]
 
         def resilient_window_mean_nan(sr):
@@ -81,9 +80,11 @@ for i in tqdm(range(len(syms))):
             return rst
 
         df.iloc[:,5:] = df.iloc[:,5:].apply(resilient_window_mean_nan, axis = 0)
-        df["VO"] = df.qty.shift(-1)
+        # df["VO"] = df.qty.shift(-1)
         df_list.append(df)
     dflst = pd.concat(df_list)
+    dflst["VO"] = dflst.qty.shift(-1)
+    dflst = dflst.dropna(axis=0)
     dflst.to_pickle(out_path+sym+'.pkl')
 
 

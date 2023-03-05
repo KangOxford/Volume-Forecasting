@@ -45,9 +45,8 @@ def ols(train, test):
     return out_of_sample(results, test)
 
 
-path = "/Users/kang/Data/"
-# data_path = path + "out/"
-data_path = path + "out_jump/"
+path = "/Users/kang/"
+data_path = path + "raw_component/"
 onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path, f))]
 file = onlyfiles[0]
 df = pd.read_csv(data_path + file, index_col=0)

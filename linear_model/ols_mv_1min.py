@@ -5,10 +5,20 @@ from os import listdir;from os.path import isfile, join
 from numba import jit
 
 
-'''on linux'''
-path = "/home/kanli/forth/"
-data_path = path + "out_jump/"
-out_path = path + 'out_ols_numba/'
+import platform # Check the system platform
+if platform.system() == 'Darwin':
+    print("Running on MacOS")
+    path = "/Users/kang/Volume-Forecasting/"
+    data_path = path + "raw_component/"
+    out_path = path + "ols_mv_1min/"
+elif platform.system() == 'Linux':
+    print("Running on Linux")
+    # '''on server'''
+    # path = "/home/kanli/forth/"
+    # data_path = path + "out_jump/"
+    # out_path = path + "out_disjoint5/"
+else:print("Unknown operating system")
+
 
 
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
@@ -17,7 +27,8 @@ already_done = sorted([f for f in listdir(out_path) if isfile(join(out_path, f))
 @jit(nopython=True)
 def ols(X, y):
     X = np.column_stack((np.ones(X.shape[0]), X))
-    beta = np.linalg.inv(X.T @ X) @ X.T @ y
+    XT_X_pinv = np.linalg.pinv(X.T @ X)
+    beta = XT_X_pinv @ X.T @ y
     return beta
 
 for j in tqdm(range(399,299,-1)): # on mac4
@@ -48,7 +59,6 @@ for j in tqdm(range(399,299,-1)): # on mac4
         y_hat = np.dot(np.append(1, X0[index,:]), beta)
         y_true = y0[index]
         rst_lst.append([y_true, y_hat])
-
 
     rst = pd.DataFrame(rst_lst)
     rst.columns = ["yTrue","yPred"]
