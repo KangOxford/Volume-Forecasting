@@ -44,79 +44,29 @@ for i in tqdm(range(len(onlyfiles))):
     file = onlyfiles[i]
     df = pd.read_pickle(data_path + file)
 
-    # df_list = []
-    gpd = df.groupby("date")
-    igpd = iter(gpd)
-    for j in range(len(gpd)):
-        index, item = next(igpd)
-
-
-    # overlapped_lookback_window {
-    lb_size = 5
-    lookback_5 = dflst.shift(1).rolling(lb_size,min_periods=1).sum()
-    # lookback_5.iloc[lb_size-1:,4:14]/=5
-    lookback_5 /= lb_size
-    for i in range(1,lb_size):
-        lookback_5.iloc[i,:] *= lb_size/i
-    # overlapped_lookback_window }
-
-
-    append_part = lookback_5.iloc[:,4:14]
-    append_part.columns = ["ol_lb5_"+ col for col in append_part.columns]
-
-    appended = pd.concat([dflst.iloc[:,:-4], append_part, dflst.iloc[:,-4:]],axis=1)
-    appended = appended.dropna(axis=0)
-    try:
-        appended.to_pickle(out_path + file[:-4] + '.pkl')
+    def aggregate_info(df,option):
+        gpd = df.groupby(option).mean()[['ntn', 'volBuyNotional',
+           'volSellNotional', 'nrTrades', 'ntr', 'volBuyNrTrades_lit',
+           'volSellNrTrades_lit', 'volBuyQty', 'volSellQty', 'qty']]
+        if option == ['date']:
+            gpd = gpd.add_prefix('daily_')
+        elif option == ['date','intrSn']:
+            gpd = gpd.add_prefix('intraday_')
+        else: raise NotImplementedError
+        # gpd.insert(0,'symbols',file[:-4])
+        return gpd
+    tobe_appended_daily    = aggregate_info(df, ['date']) # daily info
+    tobe_appended_intraday = aggregate_info(df, ['date','intrSn']) # daily info
+    appended_daily = df.merge(tobe_appended_daily, on=['date'], suffixes=['', '_grouped'])
+    appended_daily_intraday = appended_daily.merge(tobe_appended_intraday, on=['date','intrSn'], suffixes=['', '_grouped'])
+    qty = appended_daily_intraday.pop('qty')
+    vo = appended_daily_intraday.pop('VO')
+    appended_daily_intraday.insert(len(appended_daily_intraday.columns), 'qty', qty)
+    appended_daily_intraday.insert(len(appended_daily_intraday.columns), 'VO', vo)
+    try:appended_daily_intraday.to_pickle(out_path + file)
     except:
         import os;os.mkdir(out_path)
-        appended.to_pickle(out_path + file[:-4] + '.pkl')
-'''New Added'''
-
-trading_dates = pd.read_csv(path+"trading_days2017.csv",index_col=0)['0'].apply(str)
-removed_dates = pd.read_csv(path+"removed_days2017.csv",index_col=0)['0'].apply(str)
-dates = pd.DataFrame({'date':list(set(trading_dates.values).difference(set(removed_dates.values)))}).sort_values('date').reset_index().drop('index',axis=1)['date'].apply(str)
-trading_syms = pd.read_csv(path+"symbols.csv",index_col=0)['0'].apply(str)
-removed_syms = pd.read_csv(path+"removed_syms.csv",index_col=0)['0'].apply(str)
-syms = pd.DataFrame({'syms':list(set(trading_syms.values).difference(set(removed_syms.values)))}).sort_values('syms').reset_index().drop('index',axis=1)['syms'].apply(str)
-try:already_done = [f[:-4] for f in listdir(out_path) if isfile(join(out_path, f))]
-except:import os;os.mkdir(out_path);already_done = [f[:-4] for f in listdir(out_path) if isfile(join(out_path, f))]
-
-
-
-for i in tqdm(range(len(syms))):
-    sym = syms.iloc[i]
-    print(f">>> stock {i} {sym}")
-    df_list = []
-    for j in range(len(dates)):
-        date = dates.iloc[j]
-
-        df = pd.read_csv(data_path+date+'/'+date + '-'+ sym+'.csv')
-        df['qty']=df.volBuyQty+df.volSellQty;df['ntn']= df.volSellNotional+df.volBuyNotional;df['ntr']=df.volBuyNrTrades_lit+df.volSellNrTrades_lit;df['date'] = date
-        df['intrSn'] = df.timeHMs.apply(lambda x: 0 if x< 1000 else( 2 if x>=1530 else 1))
-        # df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit']]
-        df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'qty', 'volBuyQty','volSellQty', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit', 'jump_value', 'is_jump', 'signed_jump']]
-
-        def resilient_window_mean_nan(sr):
-            def double_fullfill(sr):
-                # fullfill with the surrounding 4 non-nan values
-                s_ffill = sr.ffill().ffill()
-                s_bfill = sr.bfill().bfill()
-                s_filled = (s_ffill + s_bfill) / 2
-                return s_filled
-            ffill = lambda sr: sr.ffill()
-            bfill = lambda sr: sr.bfill()
-            rst = double_fullfill(sr)
-            rst = ffill(rst)
-            rst = bfill(rst)
-            return rst
-
-        df.iloc[:,5:] = df.iloc[:,5:].apply(resilient_window_mean_nan, axis = 0)
-        df_list.append(df)
-    dflst = pd.concat(df_list)
-    dflst.to_csv(out_path+sym+'.csv')
-
-
+        appended_daily_intraday.to_pickle(out_path + file)
 
 
 
