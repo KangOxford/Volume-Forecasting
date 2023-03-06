@@ -33,9 +33,9 @@ if platform.system() == 'Darwin':
 elif platform.system() == 'Linux':
     print("Running on Linux")
     # '''on server'''
-    # path = "/home/kanli/forth/"
-    # data_path = path + "out_jump/"
-    # out_path = path + "out_disjoint5/"
+    path = "/home/kanli/fifth/"
+    data_path = path + "raw15/"
+    out_path = path + "raw_component15/"
 else:print("Unknown operating system")
 
 '''New Added'''

@@ -32,7 +32,7 @@ elif platform.system() == 'Linux':
     # '''on server'''
     path = "/home/kanli/fifth/"
 else:print("Unknown operating system")
-data_path = path + "raw_component/"
+data_path = path + "raw_component15/"
 
 onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path, f))]
 file = onlyfiles[0]
@@ -86,5 +86,5 @@ def filter_features(col_lst):
     # return keys
     return filtered_dict
 filtered_dict = filter_features(col_lst)
-pd.Series(filtered_dict).to_csv(path + "ols_feat_1min.csv")
+pd.Series(filtered_dict).to_csv(path + "ols_feat_15min.csv")
 

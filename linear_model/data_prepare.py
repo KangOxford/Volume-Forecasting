@@ -57,7 +57,8 @@ except:import os;os.mkdir(out_path);already_done = [f[:-4] for f in listdir(out_
 
 
 
-for i in tqdm(range(len(syms))):
+# for i in tqdm(range(len(syms))):
+for i in tqdm(range(10)):
     sym = syms.iloc[i]
     print(f">>> stock {i} {sym}")
     df_list = []
@@ -66,7 +67,8 @@ for i in tqdm(range(len(syms))):
         df = pd.read_csv(data_path+date+'/'+date + '-'+ sym+'.csv')
         df['qty']=df.volBuyQty+df.volSellQty;df['ntn']= df.volSellNotional+df.volBuyNotional;df['ntr']=df.volBuyNrTrades_lit+df.volSellNrTrades_lit;df['date'] = date
         df['intrSn'] = df.timeHMs.apply(lambda x: 0 if x< 1000 else( 2 if x>=1530 else 1))
-        df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit', 'jump_value', 'is_jump', 'signed_jump', 'volBuyQty','volSellQty','qty']]
+        # df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit', 'jump_value', 'is_jump', 'signed_jump', 'volBuyQty','volSellQty','qty']]
+        df = df[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn', 'ntn', 'volBuyNotional', 'volSellNotional',  'nrTrades','ntr', 'volBuyNrTrades_lit', 'volSellNrTrades_lit', 'volBuyQty','volSellQty','qty']]
 
         def resilient_window_mean_nan(sr):
             def double_fullfill(sr):
@@ -94,18 +96,20 @@ for i in tqdm(range(len(syms))):
     dflst['groupper'] = dflst.date.apply(lambda x:str(x[:4])+'-'+str(x[4:6])+'-'+str(x[6:])+ " ") + dflst['groupper']
     dflst['groupper'] = pd.to_datetime(dflst['groupper'])
 
-    dflst = dflst.rename(columns={'index': 'groupper'})
-    dfsum = dflst.groupby('groupper').sum()
-    dfmin = dflst.groupby('groupper').min()
-    dfmax = dflst.groupby('groupper').max()
-    value = dfsum.iloc[:,3:]
-    index1 = dfmin.iloc[:,[0,1,2]]
-    index2 = dfmax.iloc[:,[3,4]]
-    df = pd.concat([index1, index2, value],axis=1)
+    dflst.set_index('groupper', inplace=True)
+    gpd = dflst.groupby(pd.Grouper(freq='15Min'))
 
-    dflst["VO"] = dflst.qty.shift(-1)
-    dflst = dflst.dropna(axis=0)
-    dflst.to_pickle(out_path+sym+'.pkl')
+    dfsum = gpd.sum().dropna(axis =0)
+    dfmin = gpd.min().dropna(axis =0)
+    dfmax = gpd.max().dropna(axis =0)
+    value = dfsum.iloc[:,4:]
+    index1 = dfmin.iloc[:,[1,2,3]]
+    index2 = dfmax.iloc[:,[4,5]]
+    df = pd.concat([index1, index2, value],axis=1).dropna(axis =0)
+
+    df["VO"] = df.qty.shift(-1)
+    df = df.dropna(axis=0)
+    df.to_pickle(out_path+sym+'.pkl')
 
 
 
