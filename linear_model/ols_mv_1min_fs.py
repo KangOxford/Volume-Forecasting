@@ -58,101 +58,24 @@ for index in tqdm(range(1000)):
     model, X, y = feature_selecting(model,X,y)
     col_lst.append(X.columns.to_list())
 
-import collections
-# create a flattened list of all elements in lst
-flat_lst = [item for sublist in col_lst for item in sublist]
-# count the frequency of each value in flat_lst
-freq = collections.Counter(flat_lst)
-# print the frequency counts
-for key, value in freq.most_common():
-    print(key, value)
+def filter_features(col_lst):
+    import collections
+    # create a flattened list of all elements in lst
+    flat_lst = [item for sublist in col_lst for item in sublist]
+    # count the frequency of each value in flat_lst
+    freq = collections.Counter(flat_lst)
+    # sort the pairs by value in ascending order
+    sorted_pairs = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+    # calculate the index at which to slice the list
+    cutoff = int(len(sorted_pairs) * 0.75)
+    # create a new dictionary with the remaining pairs
+    filtered_dict = {k: v for k, v in sorted_pairs[:cutoff]}
+    def print_results(filtered_dict):
+        # print the remaining pairs in descending order
+        for key, value in sorted(filtered_dict.items(), key=lambda x: x[1], reverse=True):
+            print(key, value)
+    # print_results(filtered_dict)
+    keys = list(filtered_dict.keys())
+    return keys
+keys = filter_features(col_lst)
 
-keys = list(freq.keys())
-
-
-
-
-X = dflst.iloc[:,1:-1]
-# X = X[['date',"intrSn","qty","volBuyQty","volSellQty","volBuyNotional","nrTrades","is_jump"]]
-# X = X[['date',"intrSn","qty","volBuyQty","volSellQty","volBuyNotional","nrTrades"]]
-y = dflst.iloc[:,-1]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
-out_of_sample = ols((X_train, y_train), (X_test, y_test))
-
-
-oos_lst = []
-for state in range(100):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=state)
-    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-    out_of_sample = ols((X_train, y_train), (X_test, y_test))
-    print(f">>> out_of_sample: {out_of_sample}")
-    oos_lst.append(out_of_sample)
-np.mean(oos_lst)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-trading_dates = pd.read_csv(path+"trading_days2017.csv",index_col=0)['0'].apply(str)
-removed_dates = pd.read_csv(path+"removed_days2017.csv",index_col=0)['0'].apply(str)
-dates = pd.DataFrame({'date':list(set(trading_dates.values).difference(set(removed_dates.values)))}).sort_values('date').reset_index().drop('index',axis=1)['date'].apply(str)
-trading_syms = pd.read_csv(path+"symbols.csv",index_col=0)['0'].apply(str)
-removed_syms = pd.read_csv(path+"removed_syms.csv",index_col=0)['0'].apply(str)
-syms = pd.DataFrame({'syms':list(set(trading_syms.values).difference(set(removed_syms.values)))}).sort_values('syms').reset_index().drop('index',axis=1)['syms'].apply(str)
-
-
-
-
-df.date = pd.to_datetime(df.date)
-gpd = df.set_index('date').groupby(pd.Grouper(freq='D'))
-x_list, y_list = [], []
-for index, data in gpd:
-    x = data.iloc[:-1,-1]
-    y = data.iloc[1:,-1]
-    x_list.append(x); y_list.append(y)
-x = pd.concat(x_list); y = pd.concat(y_list)
-
-
-
-
-
-
-def data_split(data,size = 10):
-    X = data.iloc[:-size,:-1]
-    Y = data.iloc[:-size,-1]
-    pred_x = data.iloc[-size:,:-1]
-    real_y = data.iloc[-size:,-1]
-    return (X,Y),(pred_x,real_y)
-
-def ols(train, test):
-    def out_of_sample(results, test):
-        pred_x = test[0]
-        pred_x = sm.add_constant(pred_x, has_constant='add')
-        pred_y = results.predict(pred_x)
-        real_y = test[1]
-        from sklearn.metrics import r2_score
-        r_squared = r2_score(real_y, pred_y)
-        return r_squared
-
-    import statsmodels.api as sm
-    X = train[0]
-    # X = sm.add_constant(X)
-    X = sm.add_constant(X, has_constant='add')
-    Y = train[1]
-    results = sm.OLS(Y, X).fit()
-    print(results.summary())
-    return out_of_sample(results, test)
-
-    train, test = data_split(data, size=10)
-    out_of_sample = ols(train, test)
-    print(f">>> out_of_sample: {out_of_sample}")
