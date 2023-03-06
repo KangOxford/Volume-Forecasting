@@ -4,6 +4,8 @@ from tqdm import tqdm
 import warnings;warnings.simplefilter("ignore", category=FutureWarning)
 from os import listdir;from os.path import isfile, join
 
+pd.set_option('display.max_columns', None)
+
 '''1. transfer data format from format A to B'''
 '''2. fulfill nan with the mean of surrounding values'''
 '''3. generate sym.csv with all the dates merged in single csv'''
@@ -29,7 +31,6 @@ if platform.system() == 'Darwin':
     print("Running on MacOS")
     path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "2017/"
-    # out_path = path + 'out/'
     out_path = path + 'raw/'
 elif platform.system() == 'Linux':
     print("Running on Linux")
@@ -37,6 +38,9 @@ elif platform.system() == 'Linux':
     # path = "/data/cholgpu01/not-backed-up/datasets/graf/data/"
     # data_path = path + "Minutely_LOB_2017-19/"
     # out_path = path + 'out_jump/'
+    path = "/home/kanli/fifth/"
+    data_path = path + "2017/"
+    out_path = path + 'raw15/'
 else:print("Unknown operating system")
 
 
@@ -59,7 +63,6 @@ for i in tqdm(range(len(syms))):
     df_list = []
     for j in range(len(dates)):
         date = dates.iloc[j]
-
         df = pd.read_csv(data_path+date+'/'+date + '-'+ sym+'.csv')
         df['qty']=df.volBuyQty+df.volSellQty;df['ntn']= df.volSellNotional+df.volBuyNotional;df['ntr']=df.volBuyNrTrades_lit+df.volSellNrTrades_lit;df['date'] = date
         df['intrSn'] = df.timeHMs.apply(lambda x: 0 if x< 1000 else( 2 if x>=1530 else 1))
@@ -83,10 +86,26 @@ for i in tqdm(range(len(syms))):
         # df["VO"] = df.qty.shift(-1)
         df_list.append(df)
     dflst = pd.concat(df_list)
+    dflst = dflst.reset_index().iloc[:,1:]
+    dflst = dflst.reset_index()
+    # dflst.iloc[:,0] = dflst.iloc[:,0]//15
+
+    dflst['groupper'] = dflst.timeHMs.apply(lambda x:str(x).zfill(4)).apply(lambda x: x[:2]+":"+x[2:])
+    dflst['groupper'] = dflst.date.apply(lambda x:str(x[:4])+'-'+str(x[4:6])+'-'+str(x[6:])+ " ") + dflst['groupper']
+    dflst['groupper'] = pd.to_datetime(dflst['groupper'])
+
+    dflst = dflst.rename(columns={'index': 'groupper'})
+    dfsum = dflst.groupby('groupper').sum()
+    dfmin = dflst.groupby('groupper').min()
+    dfmax = dflst.groupby('groupper').max()
+    value = dfsum.iloc[:,3:]
+    index1 = dfmin.iloc[:,[0,1,2]]
+    index2 = dfmax.iloc[:,[3,4]]
+    df = pd.concat([index1, index2, value],axis=1)
+
     dflst["VO"] = dflst.qty.shift(-1)
     dflst = dflst.dropna(axis=0)
     dflst.to_pickle(out_path+sym+'.pkl')
-
 
 
 

@@ -1,5 +1,5 @@
 import pandas as pd
-from os import listdir;from os.path import isfile, join
+import os;from os import listdir;from os.path import isfile, join
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt; plt.rcParams["figure.figsize"] = (12, 8)
 
@@ -16,9 +16,7 @@ df_lst['date_time'] = df_lst.date.apply(str) + df_lst.timeHMs.apply(lambda x: st
 mean_date_time = df_lst.groupby('date_time').mean()
 mse_date_time = df_lst.groupby('date_time').apply(lambda x: mean_squared_error(x['yTrue'],x['yPred']))
 
-# '''anomaly handling'''
-# mse_date_gpd = df_lst.groupby('date_time')
-# anomaly_sample = mse_date_gpd.get_group('201707251537')
+
 
 def plot_pred_true(value,title, size=(12, 8)):
     plt.rcParams["figure.figsize"] = size
@@ -26,44 +24,34 @@ def plot_pred_true(value,title, size=(12, 8)):
     plt.plot(value.yPred.values, label='Pred')
     plt.title(title)
     plt.legend();
-    plt.savefig(path + title +'.png')
+    fig_name = path + title +'.png'
+    if os.path.exists(fig_name): os.remove(fig_name)
+    plt.savefig(fig_name)
     plt.show()
+
+def plot_mse(value, title, size=(12, 8)):
+    plt.rcParams["figure.figsize"] = size
+    plt.plot(mse_date.values, label="MSE");
+    plt.title(title)
+    plt.legend();
+    plt.savefig(path + title + '.png')
+    plt.show()
+
 '''plot'''
 '''date'''
 plot_pred_true(mean_date,"yPred_&_yTrue ols1min mean_by_date")
-plt.plot(mean_date.yTrue.values,label='True');plt.plot(mean_date.yPred.values,label='Pred')
-# plt.xticks(fontsize=20);plt.yticks(fontsize=20);
-title = "yPred_&_yTrue ols1min mean_by_date"
-plt.title(title)
-plt.legend();
-# plt.legend(fontsize=20);
-plt.show()
-
-plt.plot(mse_date.values,label="MSE");
-# plt.xticks(fontsize=20);plt.yticks(fontsize=20);
-# plt.legend(fontsize=20);
-plt.title("yPred_&_yTrue ols1min mse")
-plt.legend();
-plt.show()
+plot_mse(mse_date,"yPred_&_yTrue ols1min mse_by_date")
 
 '''date_time'''
-plt.rcParams["figure.figsize"] = (40, 10)
-plt.plot(mean_date_time.yTrue.values,label='True');plt.plot(mean_date_time.yPred.values,label='Pred')
-# plt.xticks(fontsize=20);plt.yticks(fontsize=20);
-title = "yPred_&_yTrue ols1min mean_by_date_time"
-plt.title(title)
-plt.legend();
-# plt.legend(fontsize=20);
-plt.savefig(path + title+".png")
-plt.show()
+plot_pred_true(mean_date_time,"yPred_&_yTrue ols1min mean_by_date_&_time",(40,10))
+plot_mse(mse_date_time,"yPred_&_yTrue ols1min mse_by_date_&_time")
 
-plt.rcParams["figure.figsize"] = (12, 8)
-plt.plot(mse_date_time.values,label="MSE");
-plt.title("yPred_&_yTrue ols1min mean_by_date_time")
-# plt.xticks(fontsize=20);plt.yticks(fontsize=20);
-# plt.legend(fontsize=20);
-plt.legend();
-plt.show()
+
+
+'''anomaly'''
+'''anomaly handling'''
+mse_date_gpd = df_lst.groupby('date_time')
+anomaly_sample = mse_date_gpd.get_group('201707251537')
 
 plt.plot(anomaly_sample.yTrue.values,label='True');plt.plot(anomaly_sample.yPred.values,label='Pred')
 plt.xticks(fontsize=20);plt.yticks(fontsize=20);
