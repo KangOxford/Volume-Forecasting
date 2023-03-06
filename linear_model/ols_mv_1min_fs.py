@@ -1,9 +1,6 @@
 import pandas as pd
-import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 from os import listdir;from os.path import isfile, join
-from sklearn.model_selection import train_test_split
 import statsmodels.api as sm
 
 
@@ -26,37 +23,47 @@ def ols(train, test):
     print(results.summary())
     return out_of_sample(results, test)
 
-
-path = "/Users/kang/Volume-Forecasting/"
+import platform # Check the system platform
+if platform.system() == 'Darwin':
+    print("Running on MacOS")
+    path = "/Users/kang/Volume-Forecasting/"
+elif platform.system() == 'Linux':
+    print("Running on Linux")
+    # '''on server'''
+    path = "/home/kanli/fifth/"
+else:print("Unknown operating system")
 data_path = path + "raw_component/"
+
 onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path, f))]
 file = onlyfiles[0]
-dflst = pd.read_pickle(data_path + file)
-dflst.date =dflst.date.apply(lambda x:int(x))
 
 
-window_size = 3900
-col_lst = []
-for index in tqdm(range(1000)):
-    print(f">>> index {index}")
-    X = dflst.iloc[index:window_size+index,1:-1]; y = dflst.iloc[index:window_size+index,-1]
-    def ols_with_summary(X,y):
-        X = sm.add_constant(X, has_constant='add')
-        results = sm.OLS(y, X).fit()
-        # print(results.summary())
-        return results
-    model = ols_with_summary(X, y)
-    def feature_selecting(model,X,y):
-        selected_features = model.pvalues[1:].idxmax()
-        while model.pvalues[selected_features] > 0.05:
-            X = X.drop(selected_features, axis=1)
-            if 'const' not in X.columns: X = sm.add_constant(X, has_constant='add')
-            model = sm.OLS(y, X).fit()
+def aggregate_features(file):
+    dflst = pd.read_pickle(data_path + file)
+    dflst.date = dflst.date.apply(lambda x: int(x))
+    window_size = 3900
+    col_lst = []
+    for index in tqdm(range(1000)):
+        print(f">>> index {index}")
+        X = dflst.iloc[index:window_size+index,1:-1]; y = dflst.iloc[index:window_size+index,-1]
+        def ols_with_summary(X,y):
+            X = sm.add_constant(X, has_constant='add')
+            results = sm.OLS(y, X).fit()
+            # print(results.summary())
+            return results
+        model = ols_with_summary(X, y)
+        def feature_selecting(model,X,y):
             selected_features = model.pvalues[1:].idxmax()
-        # print(model.summary())
-        return model, X, y
-    model, X, y = feature_selecting(model,X,y)
-    col_lst.append(X.columns.to_list())
+            while model.pvalues[selected_features] > 0.05:
+                X = X.drop(selected_features, axis=1)
+                if 'const' not in X.columns: X = sm.add_constant(X, has_constant='add')
+                model = sm.OLS(y, X).fit()
+                selected_features = model.pvalues[1:].idxmax()
+            # print(model.summary())
+            return model, X, y
+        model, X, y = feature_selecting(model,X,y)
+        col_lst.append(X.columns.to_list())
+col_lst = aggregate_features(file)
 
 def filter_features(col_lst):
     import collections
@@ -75,7 +82,9 @@ def filter_features(col_lst):
         for key, value in sorted(filtered_dict.items(), key=lambda x: x[1], reverse=True):
             print(key, value)
     # print_results(filtered_dict)
-    keys = list(filtered_dict.keys())
-    return keys
-keys = filter_features(col_lst)
+    # keys = list(filtered_dict.keys())
+    # return keys
+    return filtered_dict
+filtered_dict = filter_features(col_lst)
+pd.Series(filtered_dict).to_csv(path + "ols_feat_1min.csv")
 
