@@ -31,7 +31,7 @@ def ols(X, y):
     beta = XT_X_pinv @ X.T @ y
     return beta
 
-for j in tqdm(range(399,299,-1)): # on mac4
+for j in tqdm(range(399,299,-1)): 
     file = onlyfiles[j]
     if file in already_done:
         continue
