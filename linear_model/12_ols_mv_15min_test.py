@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt; plt.rcParams["figure.figsize"] = (12, 8)
 
 '''transform'''
 path = "/home/kanli/fifth/"
-data_path = path + "out_1min/"
+data_path = path + "out_15min/"
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
 df_lst = pd.concat(map(lambda file: pd.read_pickle(data_path + file), onlyfiles))
 # groupby date
@@ -39,12 +39,12 @@ def plot_mse(value, title, size=(12, 8)):
 
 '''plot'''
 '''date'''
-plot_pred_true(mean_date,"yPred_&_yTrue ols1min mean_by_date")
-plot_mse(mse_date,"yPred_&_yTrue ols1min mse_by_date")
+plot_pred_true(mean_date,"yPred_&_yTrue ols15min mean_by_date")
+plot_mse(mse_date,"yPred_&_yTrue ols15min mse_by_date")
 
 '''date_time'''
-plot_pred_true(mean_date_time,"yPred_&_yTrue ols1min mean_by_date_&_time",(40,10))
-plot_mse(mse_date_time,"yPred_&_yTrue ols1min mse_by_date_&_time")
+plot_pred_true(mean_date_time,"yPred_&_yTrue ols15min mean_by_date_&_time",(40,10))
+plot_mse(mse_date_time,"yPred_&_yTrue ols15min mse_by_date_&_time")
 
 
 

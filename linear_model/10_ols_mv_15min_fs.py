@@ -41,9 +41,9 @@ file = onlyfiles[0]
 def aggregate_features(file):
     dflst = pd.read_pickle(data_path + file)
     dflst.date = dflst.date.apply(lambda x: int(x))
-    window_size = 3900
+    window_size = 250
     col_lst = []
-    for index in tqdm(range(1000)):
+    for index in tqdm(range(100)):
         print(f">>> index {index}")
         X = dflst.iloc[index:window_size+index,1:-1]; y = dflst.iloc[index:window_size+index,-1]
         def ols_with_summary(X,y):
@@ -63,6 +63,7 @@ def aggregate_features(file):
             return model, X, y
         model, X, y = feature_selecting(model,X,y)
         col_lst.append(X.columns.to_list())
+    return col_lst
 col_lst = aggregate_features(file)
 
 def filter_features(col_lst):
@@ -74,7 +75,8 @@ def filter_features(col_lst):
     # sort the pairs by value in ascending order
     sorted_pairs = sorted(freq.items(), key=lambda x: x[1], reverse=True)
     # calculate the index at which to slice the list
-    cutoff = int(len(sorted_pairs) * 0.75)
+    # cutoff = int(len(sorted_pairs) * 1.00)
+    cutoff = int(len(sorted_pairs) * 0.95)
     # create a new dictionary with the remaining pairs
     filtered_dict = {k: v for k, v in sorted_pairs[:cutoff]}
     def print_results(filtered_dict):

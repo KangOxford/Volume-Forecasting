@@ -38,9 +38,12 @@ elif platform.system() == 'Linux':
     # path = "/data/cholgpu01/not-backed-up/datasets/graf/data/"
     # data_path = path + "Minutely_LOB_2017-19/"
     # out_path = path + 'out_jump/'
+    # path = "/home/kanli/fifth/"
+    # data_path = path + "2017/"
+    # out_path = path + 'raw15/'
     path = "/home/kanli/fifth/"
-    data_path = path + "2017/"
-    out_path = path + 'raw15/'
+    data_path = path + "out_15min/"
+    out_path = path + 'out_15min_component/'
 else:print("Unknown operating system")
 
 

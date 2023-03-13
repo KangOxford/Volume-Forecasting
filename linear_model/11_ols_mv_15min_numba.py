@@ -3,6 +3,8 @@ import numpy as np
 from tqdm import tqdm
 from os import listdir;from os.path import isfile, join
 from numba import jit
+# from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import Normalizer
 
 
 import platform # Check the system platform
@@ -14,14 +16,14 @@ elif platform.system() == 'Linux':
     # '''on server'''
     path = "/home/kanli/fifth/"
 else:print("Unknown operating system")
-data_path = path + "raw_component/"
-out_path = path + 'out_1min/'
+data_path = path + "raw_component15/"
+out_path = path + 'out_15min/'
 try: listdir(out_path)
 except:import os;os.mkdir(out_path)
 
 onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
 already_done = sorted([f for f in listdir(out_path) if isfile(join(out_path, f))])
-cols = pd.read_csv(path + "ols_feat_1min.csv",index_col=0).index.to_list()[1:]
+cols = pd.read_csv(path + "ols_feat_15min.csv",index_col=0).index.to_list()[1:]
 
 @jit(nopython=True)
 def ols(X, y):
@@ -41,14 +43,27 @@ for j in tqdm(range(len(onlyfiles))): # on mac4
     X0 = dflst.iloc[:,5:-1].to_numpy()
     y0 = dflst.iloc[:,-1].to_numpy()
 
-    window_size = 3900
+    window_size = 250
     rst_lst = []
-    for index in tqdm(range(X0.shape[0]-window_size), leave=False):
-        X = X0[window_size:index+window_size,:]
-        y = y0[window_size:index+window_size]
+    for index in tqdm(range(X0.shape[0]-2*window_size), leave=False):
+        X = X0[window_size+index:index+2*window_size,:]
+        y = y0[window_size+index:index+2*window_size]
+
+        # # Normalize each column of X
+        # scaler = StandardScaler()
+        # X = scaler.fit_transform(X)
+        # Normalize each row of X
+        normalizer = Normalizer(norm="l2")
+        X = normalizer.fit_transform(X)
+        # OLS
         beta = ols(X, y)
-        y_hat = np.dot(np.append(1, X0[index+window_size,:]), beta)
-        y_true = y0[index+window_size]
+        # Normalize the test sample
+        X_test = normalizer.transform(X0[index + window_size, :].reshape(1, -1))
+        # # Normalize the test sample
+        # X_test = scaler.transform(X0[index + 2*window_size, :].reshape(1, -1))
+
+        y_hat = np.dot(np.append(1, X0[index+2*window_size,:]), beta)
+        y_true = y0[index+2*window_size]
         rst_lst.append([y_true, y_hat])
 
     rst = pd.DataFrame(rst_lst)
