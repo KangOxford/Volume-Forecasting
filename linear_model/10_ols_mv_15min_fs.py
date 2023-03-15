@@ -27,12 +27,14 @@ import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
     path = "/Users/kang/Volume-Forecasting/"
+    data_path = path + "02_raw_component/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
     # '''on server'''
     path = "/home/kanli/fifth/"
+    data_path = path + "raw_component15/"
 else:print("Unknown operating system")
-data_path = path + "raw_component15/"
+
 
 onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path, f))]
 file = onlyfiles[0]
@@ -43,7 +45,7 @@ def aggregate_features(file):
     dflst.date = dflst.date.apply(lambda x: int(x))
     window_size = 250
     col_lst = []
-    for index in tqdm(range(100)):
+    for index in tqdm(range(500)):
         print(f">>> index {index}")
         X = dflst.iloc[index:window_size+index,1:-1]; y = dflst.iloc[index:window_size+index,-1]
         def ols_with_summary(X,y):

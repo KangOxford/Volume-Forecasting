@@ -3,21 +3,24 @@ import numpy as np
 from tqdm import tqdm
 from os import listdir;from os.path import isfile, join
 from numba import jit
-# from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import StandardScaler
+# from sklearn.preprocessing import Normalizer
 
 
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
     path = "/Users/kang/Volume-Forecasting/"
+    data_path = path + "02_raw_component/"
+    out_path = path + '03_out_15min_pred_true_pairs_after_ols/'
 elif platform.system() == 'Linux':
     print("Running on Linux")
     # '''on server'''
     path = "/home/kanli/fifth/"
+    data_path = path + "raw_component15/"
+    out_path = path + 'out_15min_pred_true_pairs_after_ols/'
 else:print("Unknown operating system")
-data_path = path + "raw_component15/"
-out_path = path + 'out_15min/'
+
 try: listdir(out_path)
 except:import os;os.mkdir(out_path)
 
@@ -42,6 +45,9 @@ for j in tqdm(range(len(onlyfiles))): # on mac4
 
     X0 = dflst.iloc[:,5:-1].to_numpy()
     y0 = dflst.iloc[:,-1].to_numpy()
+    # col norm of x
+    scaler = StandardScaler()
+    X0 = scaler.fit_transform(X0)
 
     window_size = 250
     rst_lst = []
@@ -53,21 +59,21 @@ for j in tqdm(range(len(onlyfiles))): # on mac4
         # scaler = StandardScaler()
         # X = scaler.fit_transform(X)
         # Normalize each row of X
-        normalizer = Normalizer(norm="l2")
-        X = normalizer.fit_transform(X)
+        # normalizer = Normalizer(norm="l2")
+        # X = normalizer.fit_transform(X)
         # OLS
         beta = ols(X, y)
         # Normalize the test sample
-        X_test = normalizer.transform(X0[index + window_size, :].reshape(1, -1))
+        # X_test = normalizer.transform(X0[index + window_size, :].reshape(1, -1))
         # # Normalize the test sample
         # X_test = scaler.transform(X0[index + 2*window_size, :].reshape(1, -1))
 
-        y_hat = np.dot(np.append(1, X0[index+2*window_size,:]), beta)
+        y_hat = max(0, np.dot(np.append(1, X0[index+2*window_size,:]), beta)) # add bottom
         y_true = y0[index+2*window_size]
         rst_lst.append([y_true, y_hat])
 
     rst = pd.DataFrame(rst_lst)
     rst.columns = ["yTrue","yPred"]
 
-    result = pd.concat([dflst.iloc[window_size:,[0,1,2,3,4]].reset_index().drop('index',axis=1), rst],axis=1)
+    result = pd.concat([dflst.iloc[window_size:,[0,1,2,3,4]].iloc[window_size:,:].reset_index().drop('index',axis=1), rst],axis=1)
     result.to_pickle(out_path + file)
