@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "/Users/kang/Volume-Forecasting/"
+    path = "//"
     data_path = path + "02_raw_component/"
     out_path = path + '03_out_15min_pred_true_pairs_after_ols/'
 elif platform.system() == 'Linux':
@@ -69,6 +69,7 @@ for j in tqdm(range(len(onlyfiles))): # on mac4
         # X_test = scaler.transform(X0[index + 2*window_size, :].reshape(1, -1))
 
         y_hat = max(0, np.dot(np.append(1, X0[index+2*window_size,:]), beta)) # add bottom
+        y_hat = min(y_hat, max(y0[window_size+index:index+2*window_size+1])) # add ceiling
         y_true = y0[index+2*window_size]
         rst_lst.append([y_true, y_hat])
 

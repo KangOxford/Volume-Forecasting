@@ -8,7 +8,7 @@ import warnings;warnings.simplefilter("ignore", category=FutureWarning)
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "/Users/kang/Volume-Forecasting/"
+    path = "//"
     data_path = path + "2017/"
     out_path = path + 'raw_older/'
 elif platform.system() == 'Linux':

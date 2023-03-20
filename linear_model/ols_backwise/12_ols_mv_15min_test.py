@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt; plt.rcParams["figure.figsize"] = (12, 8)
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "/Users/kang/Volume-Forecasting/"
+    path = "//"
     data_path = path + "03_out_15min_pred_true_pairs_after_ols/"
     out_path = path + "04_pred_true_fig/"
 elif platform.system() == 'Linux':

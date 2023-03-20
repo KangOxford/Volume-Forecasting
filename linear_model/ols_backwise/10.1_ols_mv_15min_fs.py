@@ -26,7 +26,7 @@ def ols(train, test):
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "/Users/kang/Volume-Forecasting/"
+    path = "//"
     data_path = path + "02_raw_component/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
