@@ -1,13 +1,14 @@
 import pandas as pd
 import os;from os import listdir;from os.path import isfile, join
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt; plt.rcParams["figure.figsize"] = (12, 8)
 
 '''transform'''
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "//"
+    path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "03_out_15min_pred_true_pairs_after_ols_intraSession/"
     out_path = path + "04_pred_true_fig_intraSession/"
 elif platform.system() == 'Linux':
@@ -23,6 +24,7 @@ except:import os;os.mkdir(out_path)
 
 old_data_path = data_path
 old_out_path = out_path
+r_squared_list = []
 for jump in ['open/','mid/','close/']:
 
     data_path = old_data_path + jump
@@ -36,11 +38,14 @@ for jump in ['open/','mid/','close/']:
     df_lst = pd.concat(map(lambda file: pd.read_pickle(data_path + file), onlyfiles))
     # groupby date
     mean_date = df_lst.groupby('date').mean()
+    r_squared_mean_date = r2_score(mean_date['yTrue'], mean_date['yPred'])
     mse_date = df_lst.groupby('date').apply(lambda x: mean_squared_error(x['yTrue'],x['yPred']))
     # groupby date and time
     df_lst['date_time'] = df_lst.date.apply(str) + df_lst.timeHMs.apply(lambda x: str(x).zfill(4))
     mean_date_time = df_lst.groupby('date_time').mean()
+    r_squared_mean_date_time = r2_score(mean_date_time['yTrue'], mean_date_time['yPred'])
     mse_date_time = df_lst.groupby('date_time').apply(lambda x: mean_squared_error(x['yTrue'],x['yPred']))
+    r_squared_list.append({jump:[r_squared_mean_date, r_squared_mean_date_time]})
 
 
 
@@ -84,4 +89,5 @@ for jump in ['open/','mid/','close/']:
     # plt.legend(fontsize=20);
     # plt.show()
 
-
+r_squared_df =pd.DataFrame([(k[:-1], v[0], v[1]) for d in r_squared_list for k, v in d.items()],
+                  columns=["IntraSession","mean_date", "mean_date_time"])

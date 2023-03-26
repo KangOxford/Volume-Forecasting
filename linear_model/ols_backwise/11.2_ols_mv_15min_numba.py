@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "//"
+    path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "02_raw_component_intraSession/"
     out_path = path + '03_out_15min_pred_true_pairs_after_ols_intraSession/'
 elif platform.system() == 'Linux':
@@ -53,7 +53,7 @@ for jump in ['open/','mid/','close/']:
         scaler = StandardScaler()
         X0 = scaler.fit_transform(X0)
 
-        window_size = 10
+        window_size = 40 if jump == "open/" else 220 if jump == "mid/" else 40
         rst_lst = []
         for index in tqdm(range(X0.shape[0]-2*window_size), leave=False):
             X = X0[window_size+index:index+2*window_size,:]

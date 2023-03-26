@@ -26,7 +26,7 @@ def ols(train, test):
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "//"
+    path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "02_raw_component/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
@@ -46,7 +46,7 @@ def aggregate_features(file):
     window_size = 250
     col_lst = []
     for index in tqdm(range(500)):
-        print(f">>> index {index}")
+        # print(f">>> index {index}")
         X = dflst.iloc[index:window_size+index,1:-1]; y = dflst.iloc[index:window_size+index,-1]
         def ols_with_summary(X,y):
             X = sm.add_constant(X, has_constant='add')

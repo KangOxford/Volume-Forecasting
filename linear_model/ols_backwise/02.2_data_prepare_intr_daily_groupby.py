@@ -27,7 +27,7 @@ from os import listdir;from os.path import isfile, join
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "//"
+    path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "01_raw/"
     out_path = path + "02_raw_component_intraSession/"
 elif platform.system() == 'Linux':

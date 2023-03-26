@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "//"
+    path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "02_raw_component/"
     out_path = path + '03_out_15min_pred_true_pairs_after_ols/'
 elif platform.system() == 'Linux':

@@ -29,7 +29,7 @@ pd.set_option('display.max_columns', None)
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "//"
+    path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "2017/"
     out_path = path + '01_raw/'
 elif platform.system() == 'Linux':

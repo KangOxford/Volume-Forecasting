@@ -26,7 +26,7 @@ def ols(train, test):
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
-    path = "//"
+    path = "/Users/kang/Volume-Forecasting/"
     data_path = path + "02_raw_component_intraSession/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
@@ -43,7 +43,7 @@ for jump in ['open/','mid/','close/']:
     def aggregate_features(file):
         dflst = pd.read_pickle(new_data_path + file)
         dflst.date = dflst.date.apply(lambda x: int(x))
-        window_size = 250
+        window_size = 40 if jump == "open/" else 220 if jump == "mid/" else 40
         col_lst = []
         for index in tqdm(range(500)):
             print(f">>> index {index}")
