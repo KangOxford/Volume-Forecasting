@@ -59,47 +59,50 @@ if __name__ == "__main__":
 
     onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
     df_lst = pd.concat(map(lambda file: pd.read_pickle(data_path + file), onlyfiles))
+
     df_lst = df_lst[df_lst.date != '20170801']
     df_lst = df_lst[df_lst.date != '20171229']
-    # groupby symbol
-    r2_scores_list = []
-    igpd = iter(df_lst.groupby('symbol'))
-    window_size = 26*20
-    item_list = []
 
+    # groupby symbol
+    igpd = iter(df_lst.groupby('symbol'))
+    mse_list,r2_list = [], []
     while True:
         try:
             symbol, item = next(igpd)
-            r2_list = []
-            for index in range(item.shape[0]-window_size):
-                new = item.iloc[index:index+window_size, :]
-                r2 = mean_squared_error(new.yTrue, new.yPred)
-                # r2 = r2_score(new.yTrue, new.yPred)
-                r2_list.append(r2)
-            assert len(r2_list) + window_size == item.shape[0]
-            item['r2'] = pd.Series(r2_list)
-            item.dropna(inplace = True)
-            item_list.append(item)
-            print(symbol, item.r2.mean())
+            mse = item.groupby("date").apply(lambda new_df:mean_squared_error(new_df.yTrue, new_df.yPred)).to_frame(symbol)
+            r2 = item.groupby("date").apply(lambda new_df:r2_score(new_df.yTrue, new_df.yPred)).to_frame(symbol)
+            mse_list.append(mse);r2_list.append(r2)
         except StopIteration: break
-    item_df = pd.concat(item_list)
-    mean_date = pd.DataFrame(item_df.groupby('date').mean()['r2'])
+    mse_df = pd.concat(mse_list,axis=1)
+    r2_df = pd.concat(r2_list,axis=1)
+    mse_df['mean'] = mse_df.apply(np.mean, axis = 1)
+    r2_df['mean'] = r2_df.apply(np.mean, axis = 1)
 
-    value = mean_date
-    value['date'] = pd.to_datetime(value.index, format='%Y%m%d')
-    plt.plot(value.date, value.r2, label = 'r2')
-    plt.plot(value.date, value.r2, label = 'mse')
-    # Set the x-axis format to display dates
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
-    # Rotate the x-axis tick labels to avoid overlap
-    plt.gcf().autofmt_xdate()
-    title = "yPred_&_yTrue ols15min rolling_mse(20_days)_by_date"
-    plt.title(title)
-    plt.legend();
-    plt.savefig(out_path + title + '.png')
-    plt.show()
+    import inspect
+    def get_var_name(var, caller_locals=None):
+        if caller_locals is None:
+            caller_locals = inspect.currentframe().f_back.f_locals
+        for name, value in caller_locals.items():
+            if value is var:
+                return name
 
+    def plot_by_date(value):
+        label = get_var_name(value, inspect.currentframe().f_back.f_locals)
+        value = value.to_frame("value")
+        value['date'] = pd.to_datetime(value.index, format='%Y%m%d')
+        plt.plot(value.date, value.value, label = label)
+        # Set the x-axis format to display dates
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+        # Rotate the x-axis tick labels to avoid overlap
+        plt.gcf().autofmt_xdate()
+        title = "yPred_&_yTrue ols15min rolling_"+label+"_by_date"
+        plt.title(title)
+        plt.legend();
+        plt.savefig(out_path + title + '.png')
+        plt.show()
 
+    mse = mse_df['mean']
+    plot_by_date(mse)
 
 
 

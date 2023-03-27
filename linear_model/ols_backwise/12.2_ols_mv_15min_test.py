@@ -3,6 +3,13 @@ import os;from os import listdir;from os.path import isfile, join
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt; plt.rcParams["figure.figsize"] = (12, 8)
+import pandas as pd
+import numpy as np
+import os;from os import listdir;from os.path import isfile, join
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt; plt.rcParams["figure.figsize"] = (12, 8)
+import matplotlib.dates as mdates
+from sklearn.metrics import r2_score
 
 '''transform'''
 import platform # Check the system platform
@@ -26,7 +33,9 @@ old_data_path = data_path
 old_out_path = out_path
 r_squared_list = []
 for jump in ['open/','mid/','close/']:
-
+    # jump = 'open/'
+    # jump = 'mid/'
+    jump = 'close/'
     data_path = old_data_path + jump
     out_path = old_out_path + jump
     try:
@@ -36,6 +45,63 @@ for jump in ['open/','mid/','close/']:
 
     onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
     df_lst = pd.concat(map(lambda file: pd.read_pickle(data_path + file), onlyfiles))
+
+    df_lst = df_lst[df_lst.date != '20170801']
+    df_lst = df_lst[df_lst.date != '20171229']
+    # groupby symbol
+    r2_scores_list = []
+    igpd = iter(df_lst.groupby('symbol'))
+    window_size = 26*20
+    # window_size = 2*20
+    # window_size = 2*50
+    item_list = []
+
+    while True:
+        try:
+            symbol, item = next(igpd)
+            r2_list = []
+            for index in range(item.shape[0]-window_size):
+                new = item.iloc[index:index+window_size, :]
+                r2 = r2_score(new.yTrue, new.yPred)
+                # r2 = mean_squared_error(new.yTrue, new.yPred)
+                r2_list.append(r2)
+            assert len(r2_list) + window_size == item.shape[0]
+            item['r2'] = pd.Series(r2_list)
+            item.dropna(inplace = True)
+            item_list.append(item)
+            print(symbol, item.r2.mean())
+        except StopIteration: break
+    item_df = pd.concat(item_list)
+    mean_date = pd.DataFrame(item_df.groupby('date').mean()['r2'])
+
+    value = mean_date
+    value['date'] = pd.to_datetime(value.index, format='%Y%m%d')
+    plt.plot(value.date, value.r2, label = 'r2')
+    # plt.plot(value.date, value.r2, label = 'mse')
+    # Set the x-axis format to display dates
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+    # Rotate the x-axis tick labels to avoid overlap
+    plt.gcf().autofmt_xdate()
+    title = "yPred_&_yTrue ols15min rolling_r2(20_days)_by_date_open_interval"
+    # title = "yPred_&_yTrue ols15min rolling_mse(20_days)_by_date_open_interval"
+    plt.title(title)
+    plt.legend();
+    plt.savefig(out_path + title + '.png')
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # groupby date
     mean_date = df_lst.groupby('date').mean()
     r_squared_mean_date = r2_score(mean_date['yTrue'], mean_date['yPred'])

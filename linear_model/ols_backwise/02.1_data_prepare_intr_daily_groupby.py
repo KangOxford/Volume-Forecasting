@@ -70,10 +70,3 @@ for i in tqdm(range(len(onlyfiles))):
 
 
 
-
-
-
-
-
-
-

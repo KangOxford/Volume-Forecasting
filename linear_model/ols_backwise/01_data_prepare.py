@@ -110,7 +110,8 @@ for i in tqdm(range(10)):
     index2 = dfmax.iloc[:,[4,5]]
     df = pd.concat([index1, index2, value],axis=1).dropna(axis =0)
 
-    df["VO"] = df.qty.shift(-1)
+    df["VO"] = df.qty.diff(1).shift(-1)/df.qty*100
+    # df["VO"] = df.qty.shift(-1)
     df = df.dropna(axis=0)
     df.to_pickle(out_path+sym+'.pkl')
 

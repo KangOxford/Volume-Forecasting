@@ -13,4 +13,4 @@ python /Users/kang/Volume-Forecasting/linear_model/ols_backwise/10.1_ols_mv_15mi
 
 python /Users/kang/Volume-Forecasting/linear_model/ols_backwise/11.1_ols_mv_15min_numba.py
 
-python /Users/kang/Volume-Forecasting/linear_model/ols_backwise/12.1_ols_mv_15min_test.py
+#python /Users/kang/Volume-Forecasting/linear_model/ols_backwise/12.1_ols_mv_15min_test.py
