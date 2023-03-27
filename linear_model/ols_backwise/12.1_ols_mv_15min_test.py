@@ -60,39 +60,54 @@ if __name__ == "__main__":
     onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
     df_lst = pd.concat(map(lambda file: pd.read_pickle(data_path + file), onlyfiles))
     df_lst = df_lst[df_lst.date != '20170801']
+    df_lst = df_lst[df_lst.date != '20171229']
     # groupby symbol
     r2_scores_list = []
     igpd = iter(df_lst.groupby('symbol'))
     window_size = 26*20
+    item_list = []
+
     while True:
         try:
             symbol, item = next(igpd)
-            item['yTrue_mean'] = item['yTrue'].rolling(window_size,min_periods=window_size).mean()
-            item["squared_residuals"] = (item.yTrue - item.yPred) ** 2
-            item["squares"] = (item.yTrue - item.yTrue_mean) ** 2
-            item['sum_squared_residuals'] = item.squared_residuals.rolling(window_size,min_periods=window_size).sum()
-            item['total_sum_of_squares'] = item.squares.rolling(window_size,min_periods=window_size).sum()
-            item['r2'] = 1 - item['sum_squared_residuals']/item['total_sum_of_squares']
-
-            index = 0
-            r2_score = r2_score.iloc[index:index+window_size,:](item.yTrue, item.yPred)
-
-
-
-
-            # Apply the compute_batch_r2 function to every batch of 20 rows
-            item['date'] = pd.to_datetime(item['date'], format='%Y%m%d')
-
-            rolling_groups = item.set_index('date').rolling(window_size,min_periods=int(window_size[:-1]))
-            r2_scores = item.groupby(item['date'].dt.floor(window_size)).apply(compute_batch_r2)
-            r2_scores.name = symbol
-            r2_scores_list.append(r2_scores)
+            r2_list = []
+            for index in range(item.shape[0]-window_size):
+                new = item.iloc[index:index+window_size, :]
+                r2 = mean_squared_error(new.yTrue, new.yPred)
+                # r2 = r2_score(new.yTrue, new.yPred)
+                r2_list.append(r2)
+            assert len(r2_list) + window_size == item.shape[0]
+            item['r2'] = pd.Series(r2_list)
+            item.dropna(inplace = True)
+            item_list.append(item)
+            print(symbol, item.r2.mean())
         except StopIteration: break
-    r2_scores_df = pd.DataFrame(r2_scores_list).T
-    r2_scores_sr = r2_scores_df.apply(np.mean, axis=1)
+    item_df = pd.concat(item_list)
+    mean_date = pd.DataFrame(item_df.groupby('date').mean()['r2'])
 
-    plt.plot(r2_scores_sr)
+    value = mean_date
+    value['date'] = pd.to_datetime(value.index, format='%Y%m%d')
+    plt.plot(value.date, value.r2, label = 'r2')
+    plt.plot(value.date, value.r2, label = 'mse')
+    # Set the x-axis format to display dates
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+    # Rotate the x-axis tick labels to avoid overlap
+    plt.gcf().autofmt_xdate()
+    title = "yPred_&_yTrue ols15min rolling_mse(20_days)_by_date"
+    plt.title(title)
+    plt.legend();
+    plt.savefig(out_path + title + '.png')
     plt.show()
+
+
+
+
+
+    # r2_scores_df = pd.DataFrame(r2_scores_list).T
+    # r2_scores_sr = r2_scores_df.apply(np.mean, axis=1)
+
+    # plt.plot(r2_scores_sr)
+    # plt.show()
 
     # value = r2_scores_sr
     #
