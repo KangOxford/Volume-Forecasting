@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os;from os import listdir;from os.path import isfile, join
 from sklearn.metrics import mean_squared_error
 import matplotlib.pyplot as plt; plt.rcParams["figure.figsize"] = (12, 8)
@@ -58,15 +59,58 @@ if __name__ == "__main__":
 
     onlyfiles = sorted([f for f in listdir(data_path) if isfile(join(data_path, f))])
     df_lst = pd.concat(map(lambda file: pd.read_pickle(data_path + file), onlyfiles))
+    df_lst = df_lst[df_lst.date != '20170801']
     # groupby symbol
+    r2_scores_list = []
     igpd = iter(df_lst.groupby('symbol'))
-    item = next(igpd)[1]
-    def compute_batch_r2(batch):
-        y_true = batch['yTrue']
-        y_pred = batch['yPred']
-        return r2_score(y_true, y_pred)
-    # Apply the compute_batch_r2 function to every batch of 20 rows
-    r2_scores = item.groupby(item.index // 20).apply(compute_batch_r2)
+    window_size = 26*20
+    while True:
+        try:
+            symbol, item = next(igpd)
+            item['yTrue_mean'] = item['yTrue'].rolling(window_size,min_periods=window_size).mean()
+            item["squared_residuals"] = (item.yTrue - item.yPred) ** 2
+            item["squares"] = (item.yTrue - item.yTrue_mean) ** 2
+            item['sum_squared_residuals'] = item.squared_residuals.rolling(window_size,min_periods=window_size).sum()
+            item['total_sum_of_squares'] = item.squares.rolling(window_size,min_periods=window_size).sum()
+            item['r2'] = 1 - item['sum_squared_residuals']/item['total_sum_of_squares']
+
+            index = 0
+            r2_score = r2_score.iloc[index:index+window_size,:](item.yTrue, item.yPred)
+
+
+
+
+            # Apply the compute_batch_r2 function to every batch of 20 rows
+            item['date'] = pd.to_datetime(item['date'], format='%Y%m%d')
+
+            rolling_groups = item.set_index('date').rolling(window_size,min_periods=int(window_size[:-1]))
+            r2_scores = item.groupby(item['date'].dt.floor(window_size)).apply(compute_batch_r2)
+            r2_scores.name = symbol
+            r2_scores_list.append(r2_scores)
+        except StopIteration: break
+    r2_scores_df = pd.DataFrame(r2_scores_list).T
+    r2_scores_sr = r2_scores_df.apply(np.mean, axis=1)
+
+    plt.plot(r2_scores_sr)
+    plt.show()
+
+    # value = r2_scores_sr
+    #
+    # # plt.rcParams["figure.figsize"] = size
+    # value['date'] = pd.to_datetime(value.index, format='%Y%m%d')
+    # plt.plot(value.date, value.values, label = 'MSE')
+    # # Set the x-axis format to display dates
+    # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+    # # Rotate the x-axis tick labels to avoid overlap
+    # plt.gcf().autofmt_xdate()
+    # plt.title(title)
+    # plt.legend();
+    # plt.savefig(out_path + title + '.png')
+    # plt.show()
+
+
+
+
 
     # groupby date
     mean_date = df_lst.groupby('date').mean()
