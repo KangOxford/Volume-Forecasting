@@ -43,8 +43,7 @@ for j in tqdm(range(len(onlyfiles))): # on mac4
     print(f">>>> {j}th {file}")
     dflst = pd.read_pickle(data_path + file)[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn']+cols+['VO']]
 
-    min_change = dflst.VO.min()
-    max_change = dflst.VO.max()
+
 
     X0 = dflst.iloc[:,5:-1].to_numpy()
     y0 = dflst.iloc[:,-1].to_numpy()
@@ -70,9 +69,10 @@ for j in tqdm(range(len(onlyfiles))): # on mac4
         # X_test = normalizer.transform(X0[index + window_size, :].reshape(1, -1))
         # # Normalize the test sample
         # X_test = scaler.transform(X0[index + 2*window_size, :].reshape(1, -1))
-
-        y_hat = max(min_change, np.dot(np.append(1, X0[index+2*window_size,:]), beta)) # add bottom
-        y_hat = min(y_hat, max_change) # add ceiling
+        min_limit = y.min()
+        max_limit = y.max()
+        y_hat = max(min_limit, np.dot(np.append(1, X0[index+2*window_size,:]), beta)) # add bottom
+        y_hat = min(y_hat, max_limit) # add ceiling
         # y_hat = np.dot(np.append(1, X0[index+2*window_size,:]), beta)
         y_true = y0[index+2*window_size]
         rst_lst.append([y_true, y_hat])
