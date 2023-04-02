@@ -135,6 +135,7 @@ if __name__ == "__main__":
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     # Rotate the x-axis tick labels to avoid overlap
     plt.gcf().autofmt_xdate()
+
     plt.legend();
     plt.show()
 

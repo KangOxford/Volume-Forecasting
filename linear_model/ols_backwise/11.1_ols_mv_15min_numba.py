@@ -42,7 +42,7 @@ for j in tqdm(range(len(onlyfiles))): # on mac4
     #     continue
     print(f">>>> {j}th {file}")
     dflst = pd.read_pickle(data_path + file)[['symbol', 'date', 'timeHMs', 'timeHMe', 'intrSn']+cols+['VO']]
-
+    dflst.groupby(["date"]).apply(np.count)
 
 
     X0 = dflst.iloc[:,5:-1].to_numpy()
@@ -51,24 +51,13 @@ for j in tqdm(range(len(onlyfiles))): # on mac4
     scaler = StandardScaler()
     X0 = scaler.fit_transform(X0)
 
-    window_size = 250
+    window_size = 260
     rst_lst = []
     for index in tqdm(range(X0.shape[0]-2*window_size), leave=False):
         X = X0[window_size+index:index+2*window_size,:]
         y = y0[window_size+index:index+2*window_size]
 
-        # # Normalize each column of X
-        # scaler = StandardScaler()
-        # X = scaler.fit_transform(X)
-        # Normalize each row of X
-        # normalizer = Normalizer(norm="l2")
-        # X = normalizer.fit_transform(X)
-        # OLS
         beta = ols(X, y)
-        # Normalize the test sample
-        # X_test = normalizer.transform(X0[index + window_size, :].reshape(1, -1))
-        # # Normalize the test sample
-        # X_test = scaler.transform(X0[index + 2*window_size, :].reshape(1, -1))
         min_limit = y.min()
         max_limit = y.max()
         y_hat = max(min_limit, np.dot(np.append(1, X0[index+2*window_size,:]), beta)) # add bottom
