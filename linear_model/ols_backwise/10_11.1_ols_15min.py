@@ -5,6 +5,9 @@ from os import listdir;from os.path import isfile, join
 from numba import jit
 from sklearn.preprocessing import StandardScaler
 # from sklearn.preprocessing import Normalizer
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+warnings.filterwarnings('ignore', category=ConvergenceWarning)
 
 
 import platform # Check the system platform
@@ -37,7 +40,9 @@ def ols(X, y):
 
 
 
-
+r2_score_arr_list = []
+mse_score_arr_list = []
+y_true_pred_arr_list = []
 for i in tqdm(range(len(onlyfiles))): # on mac4
     bin_size = 26
     num_day = 10
@@ -57,6 +62,8 @@ for i in tqdm(range(len(onlyfiles))): # on mac4
     dflst.iloc[:,4:-1] = scaler.transform(dflst.iloc[:,4:-1])
 
     r2_score_list = []
+    mse_score_list = []
+    y_true_pred_list = []
     times = np.arange(0,dflst.shape[0]//bin_size-num_day)
     for time in times:
         index = bin_size * time
@@ -68,12 +75,17 @@ for i in tqdm(range(len(onlyfiles))): # on mac4
         reg = Lasso(alpha=1)
         reg.fit(X_train, y_train)
         y_pred = reg.predict(X_test)
-        y = pd.DataFrame([y_test,y_pred]).T
-        r2_score = reg.score(X_test,y_test)
+        min_limit, max_limit = y_train.min(), y_train.max()
+        y_pred = np.vectorize(lambda x: min(max(min_limit, x),max_limit))(y_pred)
+        from sklearn.metrics import r2_score
+        r2_score_value = r2_score(y_test,y_pred)
+        from sklearn.metrics import mean_squared_error
+        mse_score_value = mean_squared_error(y_test,y_pred)
         date = dflst.date.iloc[index+bin_size*num_day]
-
-        r2_score_list.append([date,r2_score])
-
+        y_true_pred = np.array([np.full(bin_size, file[:-4]).astype(str),np.full(bin_size, date).astype(str), y_test, y_pred.astype(np.float32)]).T
+        y_true_pred_list.append(y_true_pred)
+        r2_score_list.append([file[:-4],date,r2_score_value])
+        mse_score_list.append([file[:-4],date,mse_score_value])
 
         # print('R squared training set', round(reg.score(X_train, y_train) * 100, 2))
         # from sklearn.metrics import mean_squared_error
@@ -81,27 +93,55 @@ for i in tqdm(range(len(onlyfiles))): # on mac4
         # pred_train = reg.predict(X_train)
         # mse_train = mean_squared_error(y_train, pred_train)
         # print('MSE training set', round(mse_train, 2))
-
+    # warnings.filterwarnings("default", category=RuntimeWarning)
+    y_true_pred_arr = np.array(y_true_pred_list).reshape(-1,4)
     r2_score_arr = np.array(r2_score_list)
+    mse_score_arr = np.array(mse_score_list)
 
-    fig_path = path + "04_pred_true_fig/"
-    import matplotlib.pyplot as plt
-    import matplotlib.dates as mdates
-    # x_axis = np.arange(len(values))
-    dates = r2_score_arr[:,0]
-    values = r2_score_arr[:,1].astype(np.float32)
-    dates = pd.to_datetime(dates, format='%Y%m%d')
-    x_axis = dates
-    plt.plot(x_axis, values)
-    plt.plot(x_axis, np.full(len(values), values.mean()), label=f'Mean: {values.mean():.2f}')  # mean value
-    # Set the x-axis format to display dates
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
-    # Rotate the x-axis tick labels to avoid overlap
-    plt.gcf().autofmt_xdate()
-    plt.xlabel('Date')
-    plt.ylabel('R2 Score')
-    title = "R2 Score for Single Stock " + file[:-4]
-    plt.title(title)
-    plt.legend()
-    plt.savefig(fig_path+title)
-    plt.show()
+    r2_score_arr_list.append(r2_score_arr)
+    mse_score_arr_list.append(mse_score_arr)
+    y_true_pred_arr_list.append(y_true_pred_arr)
+
+    def plot(r2_score_arr, name):
+        fig_path = path + "04_pred_true_fig/"
+        import matplotlib.pyplot as plt
+        import matplotlib.dates as mdates
+        # x_axis = np.arange(len(values))
+        dates = r2_score_arr[:,-2]
+        values = r2_score_arr[:,-1].astype(np.float32)
+        dates = pd.to_datetime(dates, format='%Y%m%d')
+        x_axis = dates
+        plt.plot(x_axis, values)
+        plt.plot(x_axis, np.full(len(values), values.mean()), label=f'Mean: {values.mean():.2f}')  # mean value
+        # Set the x-axis format to display dates
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+        # Rotate the x-axis tick labels to avoid overlap
+        plt.gcf().autofmt_xdate()
+        plt.xlabel('Date')
+        plt.ylabel(name + ' Score')
+        title = name + " Score for Single Stock " + file[:-4]
+        plt.title(title)
+        plt.legend()
+        plt.savefig(fig_path+title)
+        plt.show()
+    # plot(r2_score_arr, "R2")
+    # plot(mse_score_arr, "MSE")
+
+r2_score_arr_arr = np.array(r2_score_arr_list).reshape(-1,3)
+mse_score_arr_arr = np.array(mse_score_arr_list).reshape(-1,3)
+y_true_pred_arr_arr = np.array(y_true_pred_arr_list).reshape(-1,4)
+
+r2_score_arr_df = pd.DataFrame(r2_score_arr_arr,columns=["symbol",'date','value'])
+mse_score_arr_df = pd.DataFrame(mse_score_arr_arr,columns=["symbol",'date','value'])
+y_true_pred_arr_df = pd.DataFrame(y_true_pred_arr_arr,columns=["symbol",'date','true','pred'])
+
+result_data_path = path + "05_result_data_path/"
+try:listdir(result_data_path)
+except:import os;os.mkdir(result_data_path)
+
+r2_score_arr_df.to_csv(result_data_path + "r2_score.csv")
+mse_score_arr_df.to_csv(result_data_path + "mse_score.csv")
+y_true_pred_arr_df.to_csv(result_data_path + "y_true_pred.csv")
+
+
+
