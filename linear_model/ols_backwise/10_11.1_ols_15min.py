@@ -5,9 +5,10 @@ from os import listdir;from os.path import isfile, join
 from numba import jit
 from sklearn.preprocessing import StandardScaler
 # from sklearn.preprocessing import Normalizer
-import warnings
-from sklearn.exceptions import ConvergenceWarning
-warnings.filterwarnings('ignore', category=ConvergenceWarning)
+
+# import warnings
+# from sklearn.exceptions import ConvergenceWarning
+# warnings.filterwarnings('ignore', category=ConvergenceWarning)
 
 
 import platform # Check the system platform
@@ -38,7 +39,15 @@ def ols(X, y):
     beta = XT_X_pinv @ X.T @ y
     return beta
 
+array1 = np.concatenate( [np.arange(1,10,0.01), np.arange(10,50,0.1) ])
+array2 = np.arange(1,0.001,-0.001)
+combined_array = np.array(list(zip(array1, array2))).flatten()
+# used for alphas
 
+
+# regulator = "Ridge"
+# regulator = "Lasso"
+regulator = "OLS"
 
 r2_score_arr_list = []
 mse_score_arr_list = []
@@ -71,9 +80,35 @@ for i in tqdm(range(len(onlyfiles))): # on mac4
         y_train = dflst.iloc[index:index+bin_size*num_day:,-1]
         X_test = dflst.iloc[index+bin_size*num_day:index+bin_size*(num_day+1),4:-1]
         y_test = dflst.iloc[index+bin_size*num_day:index+bin_size*(num_day+1),-1].values
-        from sklearn.linear_model import Lasso
-        reg = Lasso(alpha=1)
-        reg.fit(X_train, y_train)
+        def regularity_ols(X_train, y_train,regulator):
+            if regulator == "OLS":
+                # print("OLS")
+                from sklearn.linear_model import LinearRegression
+                reg = LinearRegression().fit(X_train, y_train)
+                # print(reg.coef_) #$
+                return reg
+            else:
+                # print("LASSO RIDGE")
+                def find_best_regularity_alpha(X_train, y_train):
+                    if regulator == "Lasso":
+                        from sklearn.linear_model import LassoCV
+                        model = LassoCV(random_state=0, max_iter=10000000)
+                    if regulator == "Ridge":
+                        from sklearn.linear_model import RidgeCV
+                        model = RidgeCV(alphas=combined_array)
+                    model.fit(X_train, y_train)
+                    return model.alpha_
+                best_regularity_alpha = find_best_regularity_alpha(X_train, y_train)
+                print(best_regularity_alpha) #$
+                if regulator == "Lasso":
+                    from sklearn.linear_model import Lasso
+                    reg = Lasso(alpha=best_regularity_alpha,max_iter=10000000, tol = 1e-2)
+                if regulator == "Ridge":
+                    from sklearn.linear_model import Ridge
+                    reg = Ridge(alpha=best_regularity_alpha,max_iter=10000000, tol = 1e-2)
+                reg.fit(X_train, y_train)
+                return reg
+        reg = regularity_ols(X_train, y_train, regulator)
         y_pred = reg.predict(X_test)
         min_limit, max_limit = y_train.min(), y_train.max()
         y_pred = np.vectorize(lambda x: min(max(min_limit, x),max_limit))(y_pred)
@@ -135,7 +170,7 @@ r2_score_arr_df = pd.DataFrame(r2_score_arr_arr,columns=["symbol",'date','value'
 mse_score_arr_df = pd.DataFrame(mse_score_arr_arr,columns=["symbol",'date','value'])
 y_true_pred_arr_df = pd.DataFrame(y_true_pred_arr_arr,columns=["symbol",'date','true','pred'])
 
-result_data_path = path + "05_result_data_path/"
+result_data_path = path + "05_result_data_path/"+regulator+"/"
 try:listdir(result_data_path)
 except:import os;os.mkdir(result_data_path)
 
@@ -145,3 +180,7 @@ y_true_pred_arr_df.to_csv(result_data_path + "y_true_pred.csv")
 
 
 
+array1 = np.concatenate( [np.arange(1,10,0.01), np.arange(10,50,0.1) ])
+array2 = np.arange(1,0.001,-0.001)
+combined_array = np.array(list(zip(array1, array2))).flatten()
+print(combined_array)

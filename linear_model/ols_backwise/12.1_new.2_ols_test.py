@@ -169,5 +169,5 @@ def plot(r2_df,name):
     plt.legend()
     # plt.savefig(fig_path + title)
     plt.show()
-# plot(r2_df,name = "R2")
+plot(r2_df,name = "R2")
 plot(mse_df,name = "MSE")

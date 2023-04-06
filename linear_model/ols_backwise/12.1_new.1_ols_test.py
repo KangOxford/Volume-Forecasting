@@ -7,24 +7,29 @@ import matplotlib.dates as mdates
 from sklearn.metrics import r2_score
 import inspect
 
+
+# regulator = "Lasso"
+# regulator = "Ridge"
+regulator = "OLS"
+
+
 '''transform'''
 import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
     path = "/Users/kang/Volume-Forecasting/"
-    data_path = path + "05_result_data_path/"
+    data_path = path + "05_result_data_path/"+regulator+"/"
     # out_path = path + "04_pred_true_fig/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
     # '''on server'''
     path = "/home/kanli/fifth/"
-    data_path = path + "05_result_data_path/"
+    data_path = path + "05_result_data_path/"+regulator+"/"
     # out_path = path + "05_result_data_path/"
 else:print("Unknown operating system")
 
 # try: listdir(out_path)
 # except:import os;os.mkdir(out_path)
-
 r2_df = pd.read_csv(data_path+"r2_score.csv",index_col=0)
 mse_df = pd.read_csv(data_path+"mse_score.csv",index_col=0)
 y_df = pd.read_csv(data_path+"y_true_pred.csv",index_col=0)
@@ -38,7 +43,7 @@ def plot(r2_df,name):
     mean_std = pd.concat([mean_minus_std,mean,mean_add_std],axis=1)
 
 
-    fig_path = path + "06_analysis_fig/"
+    fig_path = path + "06_analysis_fig/" + regulator+"/"
     try: listdir(fig_path)
     except:import os;os.mkdir(fig_path)
 
@@ -61,12 +66,20 @@ def plot(r2_df,name):
     plt.gcf().autofmt_xdate()
     plt.xlabel('Date')
     plt.ylabel(name + ' Score')
-    # title = name + " Score for Single Stock " + file[:-4]
-    # plt.title(title)
+    title = name + " Score for Averaged"
+    plt.title(title)
     plt.legend()
-    # plt.savefig(fig_path + title)
+    plt.savefig(fig_path + title)
     plt.show()
-plot(r2_df,name = "R2")
-plot(mse_df,name = "MSE")
+
+def filter_date(r2_df):
+    option_exprire_list= [20170721,20170818,20170915,20171020,20171117,20171215]
+    strange_list = [20171019]
+    outstanding_date_list = option_exprire_list + strange_list
+    re = r2_df[~r2_df['date'].isin(outstanding_date_list)]
+    return re
+    
+plot(filter_date(r2_df),name = "R2")
+plot(filter_date(mse_df),name = "MSE")
 
 
