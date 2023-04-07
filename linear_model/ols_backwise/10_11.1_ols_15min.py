@@ -87,7 +87,7 @@ if __name__=="__main__":
                     from sklearn.linear_model import LinearRegression
                     from sklearn.feature_selection import RFE
                     ## create ranking among all features by selecting only one
-                    rfe = RFE(LinearRegression(), n_features_to_select = X_train.shape[1]//2)
+                    rfe = RFE(LinearRegression(), n_features_to_select = X_train.shape[1]//5)
                     rfe.fit(X_train, y_train)
                     return rfe
                     # from sklearn.linear_model import LinearRegression

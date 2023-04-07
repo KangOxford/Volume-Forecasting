@@ -8,9 +8,9 @@ from sklearn.metrics import r2_score
 import inspect
 
 
-regulator = "Lasso"
+# regulator = "Lasso"
 # regulator = "Ridge"
-# regulator = "OLS"
+regulator = "OLS"
 
 
 '''transform'''
@@ -75,9 +75,9 @@ def plot(r2_df,name):
 def filter_date(r2_df):
     option_exprire_list= [20170721,20170818,20170915,20171020,20171117,20171215]
     strange_list = [] # default
-    strange_list = [20171019,20171114,20171129] # Lasso
+    # strange_list = [20171019,20171114,20171129] # Lasso
     # strange_list = [20170912, 20171019] # Ridge
-    # strange_list = [20171019,20170811,20170720,20170725,20170815,20171116,20171228] #ols
+    strange_list = [20171019,20170811,20170720,20170725,20170815,20171116,20171228] #ols
     outstanding_date_list = option_exprire_list + strange_list
     re = r2_df[~r2_df['date'].isin(outstanding_date_list)]
     return re
