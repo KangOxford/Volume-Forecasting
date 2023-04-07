@@ -77,8 +77,8 @@ def filter_date(r2_df):
     strange_list = [] # default
     # strange_list = [20171019,20171114,20171129] # Lasso
     # strange_list = [20170912, 20171019] # Ridge
-    strange_list = [20171019,20170811,20170720,20170725,20170815,20171116,20171228] #ols
-    strange_list = [20171019,20170811,20170720,20170725,20170815,20171116,20171228] #ols
+    strange_list = [20170811,20170720,20170815,20171019,20171027,20170725,20170803,20170802] #ols
+    # # filter_date_r2_df.date.iloc[filter_date_r2_df.value.argmin()]
     outstanding_date_list = option_exprire_list + strange_list
     re = r2_df[~r2_df['date'].isin(outstanding_date_list)]
     return re
