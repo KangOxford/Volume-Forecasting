@@ -81,19 +81,34 @@ if __name__=="__main__":
             y_train = dflst.iloc[index:index+bin_size*num_day:,-1]
             X_test = dflst.iloc[index+bin_size*num_day:index+bin_size*(num_day+1),4:-1]
             y_test = dflst.iloc[index+bin_size*num_day:index+bin_size*(num_day+1),-1].values
-            def regularity_ols(X_train, y_train,regulator):
+            def regularity_ols(X_train, y_train, X_test ,regulator):
                 if regulator == "OLS":
                     # print("OLS")
-                    from sklearn.linear_model import LinearRegression
-                    from sklearn.feature_selection import RFE
-                    ## create ranking among all features by selecting only one
-                    rfe = RFE(LinearRegression(), n_features_to_select = X_train.shape[1]//5)
-                    rfe.fit(X_train, y_train)
-                    return rfe
-                    # from sklearn.linear_model import LinearRegression
-                    # reg = LinearRegression().fit(X_train, y_train)
-                    # # print(reg.coef_) #$
-                    # return reg
+                    import statsmodels.api as sm
+                    def ols_with_summary(X, y):
+                        X = sm.add_constant(X, has_constant='add')
+                        results = sm.OLS(y, X).fit()
+                        # print(results.summary())
+                        return results
+                    def feature_selecting(model, X, y):
+                        selected_features = model.pvalues[1:].idxmax()
+                        while model.pvalues[selected_features] > 0.05:
+                            X = X.drop(selected_features, axis=1)
+                            if 'const' not in X.columns: X = sm.add_constant(X, has_constant='add')
+                            model = sm.OLS(y, X).fit()
+                            selected_features = model.pvalues[1:].idxmax()
+                        # print(model.summary())
+                        return model, X, y
+                    model = ols_with_summary(X_train, y_train)
+                    model, X, y = feature_selecting(model, X_train, y_train)
+                    columns = X.columns.to_list()
+                    # test sets
+                    if 'const' in columns:
+                        columns.remove('const')
+                        X = X_test[columns]
+                        X = sm.add_constant(X, has_constant='add')
+                    y_pred = model.predict(X)
+                    return y_pred
                 elif regulator in ["Lasso","Ridge"]:
                     # print("LASSO / RIDGE")
                     def find_best_regularity_alpha(X_train, y_train):
@@ -114,10 +129,12 @@ if __name__=="__main__":
                         from sklearn.linear_model import Ridge
                         reg = Ridge(alpha=best_regularity_alpha,max_iter=10000000, tol = 1e-2)
                     reg.fit(X_train, y_train)
-                    return reg
+                    y_pred = reg.predict(X_test)
+                    return y_pred
                 else: raise NotImplementedError
-            reg = regularity_ols(X_train, y_train, regulator)
-            y_pred = reg.predict(X_test)
+            # reg = regularity_ols(X_train, y_train, regulator)
+            # y_pred = reg.predict(X_test)
+            y_pred = regularity_ols(X_train, y_train, X_test, regulator)
             min_limit, max_limit = y_train.min(), y_train.max()
             y_pred = np.vectorize(lambda x: min(max(min_limit, x),max_limit))(y_pred)
             from sklearn.metrics import r2_score
