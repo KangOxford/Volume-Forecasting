@@ -15,14 +15,12 @@ import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
     path = "/Users/kang/Volume-Forecasting/"
-    data_path = path + "02_raw_component/"
-    out_path = path + '03_out_15min_pred_true_pairs_after_ols/'
 elif platform.system() == 'Linux':
     print("Running on Linux")
     path = "/home/kanli/fifth/"
-    data_path = path + "raw_component15/"
-    out_path = path + 'out_15min_pred_true_pairs_after_ols/'
 else:print("Unknown operating system")
+data_path = path + "02_raw_component/"
+out_path = path + '03_out_15min_pred_true_pairs_after_ols/'
 
 try: listdir(out_path)
 except:import os;os.mkdir(out_path)
@@ -169,31 +167,6 @@ if __name__=="__main__":
         r2_score_arr_list.append(r2_score_arr)
         mse_score_arr_list.append(mse_score_arr)
         y_true_pred_arr_list.append(y_true_pred_arr)
-
-        def plot(r2_score_arr, name):
-            fig_path = path + "04_pred_true_fig/"
-            import matplotlib.pyplot as plt
-            import matplotlib.dates as mdates
-            # x_axis = np.arange(len(values))
-            dates = r2_score_arr[:,-2]
-            values = r2_score_arr[:,-1].astype(np.float32)
-            dates = pd.to_datetime(dates, format='%Y%m%d')
-            x_axis = dates
-            plt.plot(x_axis, values)
-            plt.plot(x_axis, np.full(len(values), values.mean()), label=f'Mean: {values.mean():.2f}')  # mean value
-            # Set the x-axis format to display dates
-            plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
-            # Rotate the x-axis tick labels to avoid overlap
-            plt.gcf().autofmt_xdate()
-            plt.xlabel('Date')
-            plt.ylabel(name + ' Score')
-            title = name + " Score for Single Stock " + file[:-4]
-            plt.title(title)
-            plt.legend()
-            plt.savefig(fig_path+title)
-            plt.show()
-        # plot(r2_score_arr, "R2")
-        # plot(mse_score_arr, "MSE")
 
     r2_score_arr_arr = np.array(r2_score_arr_list).reshape(-1,3)
     mse_score_arr_arr = np.array(mse_score_arr_list).reshape(-1,3)
