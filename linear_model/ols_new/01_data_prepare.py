@@ -30,14 +30,14 @@ import platform # Check the system platform
 if platform.system() == 'Darwin':
     print("Running on MacOS")
     path = "/Users/kang/Volume-Forecasting/"
-    data_path = path + "2017/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
-    path = "/home/kanli/fifth/"
-    data_path = path + "out_15min/"
+    path = "/home/kanli/seventh/"
 else:print("Unknown operating system")
+data_path = path + "2017/"
 out_path = path + '01_raw/'
-
+try: listdir(out_path)
+except:import os;os.mkdir(out_path)
 
 
 

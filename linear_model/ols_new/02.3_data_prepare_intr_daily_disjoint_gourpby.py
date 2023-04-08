@@ -11,7 +11,7 @@ if platform.system() == 'Darwin':
     path = "/Users/kang/Volume-Forecasting/"
 elif platform.system() == 'Linux':
     print("Running on Linux")
-    path = "/home/kanli/fifth/"
+    path = "/home/kanli/seventh/"
 else:print("Unknown operating system")
 data_path = path + "01_raw/"
 out_path = path + "02_raw_component/"

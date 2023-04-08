@@ -20,7 +20,7 @@ if platform.system() == 'Darwin':
 elif platform.system() == 'Linux':
     print("Running on Linux")
     # '''on server'''
-    path = "/home/kanli/fifth/"
+    path = "/home/kanli/seventh/"
 else:print("Unknown operating system")
 data_path = path + "05_result_data_path/"
 
