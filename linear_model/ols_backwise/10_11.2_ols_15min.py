@@ -81,8 +81,8 @@ if __name__=="__main__":
             for drift in range(bin_size):
                 X_train = dflst.iloc[index+drift:index+bin_size*num_day+drift,4:-1]
                 y_train = dflst.iloc[index+drift:index+bin_size*num_day+drift,-1]
-                X_test = dflst.iloc[index+bin_size*num_day+drift+1,4:-1]
-                y_test = dflst.iloc[index+bin_size*num_day+drift+1,-1]
+                X_test = dflst.iloc[index+bin_size*num_day+drift,4:-1]
+                y_test = dflst.iloc[index+bin_size*num_day+drift,-1]
                 def regularity_ols(X_train, y_train, X_test ,regulator):
                     if regulator == "OLS":
                         # print("OLS")
@@ -137,7 +137,8 @@ if __name__=="__main__":
                     else: raise NotImplementedError
                 # reg = regularity_ols(X_train, y_train, regulator)
                 # y_pred = reg.predict(X_test)
-                y_pred = regularity_ols(X_train, y_train, X_test, regulator)
+                y_pred = np.array([0]) #$
+                # y_pred = regularity_ols(X_train, y_train, X_test, regulator)
                 min_limit, max_limit = y_train.min(), y_train.max()
                 y_pred = np.vectorize(lambda x: min(max(min_limit, x),max_limit))(y_pred)[0]
                 y_list.append([y_test,y_pred])
