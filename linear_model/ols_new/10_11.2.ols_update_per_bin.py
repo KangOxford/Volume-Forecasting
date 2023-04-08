@@ -43,8 +43,8 @@ combined_array = np.array(list(zip(array1, array2))).flatten()
 
 
 # regulator = "Ridge"
-# regulator = "Lasso"
-regulator = "OLS"
+regulator = "Lasso"
+# regulator = "OLS"
 
 if __name__=="__main__":
     r2_score_arr_list = []
