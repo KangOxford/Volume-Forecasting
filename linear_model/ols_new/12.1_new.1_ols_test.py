@@ -39,6 +39,8 @@ def plot(r2_df,name):
     mean_std = pd.concat([mean_minus_std,mean,mean_add_std],axis=1)
 
 
+    try: listdir(path + "06_analysis_fig/")
+    except:import os;os.mkdir(path + "06_analysis_fig/")
     fig_path = path + "06_analysis_fig/" + regulator+"/"
     try: listdir(fig_path)
     except:import os;os.mkdir(fig_path)

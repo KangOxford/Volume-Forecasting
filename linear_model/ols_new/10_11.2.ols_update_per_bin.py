@@ -176,6 +176,10 @@ if __name__=="__main__":
     mse_score_arr_df = pd.DataFrame(mse_score_arr_arr,columns=["symbol",'date','value'])
     y_true_pred_arr_df = pd.DataFrame(y_true_pred_arr_arr,columns=["symbol",'date','true','pred'])
 
+
+    try:listdir(path + "05_result_data_path/")
+    except:import os;os.mkdir(path + "05_result_data_path/")
+
     result_data_path = path + "05_result_data_path/"+regulator+"/"
     try:listdir(result_data_path)
     except:import os;os.mkdir(result_data_path)
@@ -186,7 +190,7 @@ if __name__=="__main__":
 
 
 
-    array1 = np.concatenate( [np.arange(1,10,0.01), np.arange(10,50,0.1) ])
-    array2 = np.arange(1,0.001,-0.001)
-    combined_array = np.array(list(zip(array1, array2))).flatten()
-    print(combined_array)
+    # array1 = np.concatenate( [np.arange(1,10,0.01), np.arange(10,50,0.1) ])
+    # array2 = np.arange(1,0.001,-0.001)
+    # combined_array = np.array(list(zip(array1, array2))).flatten()
+    # print(combined_array)
