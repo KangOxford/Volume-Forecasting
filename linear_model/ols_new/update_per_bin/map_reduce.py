@@ -37,6 +37,49 @@ def ols(X, y):
     beta = XT_X_pinv @ X.T @ y
     return beta
 
+
+bin_size = 26
+num_day = 10
+
+import mr4mp
+
+def trial(time,dflst):
+    index = bin_size * time
+    y_list = []
+    for drift in range(bin_size):
+        X_train = dflst.iloc[index + drift:index + bin_size * num_day + drift, 4:-1]
+        y_train = dflst.iloc[index + drift:index + bin_size * num_day + drift, -1]
+        X_test = dflst.iloc[index + bin_size * num_day + drift, 4:-1]
+        y_test = dflst.iloc[index + bin_size * num_day + drift, -1]
+        y_pred = regularity_ols(X_train, y_train, X_test, regulator)
+        min_limit, max_limit = y_train.min(), y_train.max()
+        y_pred = min(max(min_limit, y_pred), max_limit)
+        y_list.append([y_test, y_pred])
+    y_arr = np.array(y_list)
+    y_test = y_arr[:, 0];
+    y_pred = y_arr[:, 1]
+    from sklearn.metrics import r2_score
+    r2_score_value = r2_score(y_test, y_pred)
+    from sklearn.metrics import mean_squared_error
+    mse_score_value = mean_squared_error(y_test, y_pred)
+    date = dflst.date.iloc[index + bin_size * num_day]
+    y_true_pred = np.array(
+        [np.full(bin_size, file[:-4]).astype(str), np.full(bin_size, date).astype(str), y_test,
+         y_pred.astype(np.float32)]).T
+    return [file[:-4], date, r2_score_value, mse_score_value, y_true_pred]
+
+
+def combine(results,dflst):
+    r2_score_list = []
+    mse_score_list = []
+    y_true_pred_list = []
+    for res in results:
+        r2_score_list.append([res[0], res[1], res[2]])
+        mse_score_list.append([res[0], res[1], res[3]])
+        y_true_pred_list.append(res[4])
+    return [r2_score_list, mse_score_list, y_true_pred_list]
+
+
 array1 = np.concatenate( [np.arange(1,10,0.01), np.arange(10,50,0.1) ])
 array2 = np.arange(1,0.001,-0.001)
 combined_array = np.array(list(zip(array1, array2))).flatten()
@@ -52,8 +95,7 @@ if __name__=="__main__":
     mse_score_arr_list = []
     y_true_pred_arr_list = []
     for i in tqdm(range(len(onlyfiles)),leave=True): # on mac4
-        bin_size = 26
-        num_day = 10
+
         file = onlyfiles[i]
         # if file in already_done:
         #     print(f"++++ {j}th {file} is already done before")
@@ -70,42 +112,14 @@ if __name__=="__main__":
         dflst.iloc[:,4:-1] = scaler.transform(dflst.iloc[:,4:-1])
 
         # mapreduce {
-        r2_score_list = []
-        mse_score_list = []
-        y_true_pred_list = []
-        times = np.arange(0,dflst.shape[0]//bin_size-num_day)
-        for time in tqdm(times, leave=True):
-            print(f"time: {time}/{times[-1]}")
-            index = bin_size * time
-            y_list =[]
-            for drift in range(bin_size):
-                X_train = dflst.iloc[index+drift:index+bin_size*num_day+drift,4:-1]
-                y_train = dflst.iloc[index+drift:index+bin_size*num_day+drift,-1]
-                X_test = dflst.iloc[index+bin_size*num_day+drift,4:-1]
-                y_test = dflst.iloc[index+bin_size*num_day+drift,-1]
-                y_pred = regularity_ols(X_train, y_train, X_test, regulator)
-                min_limit, max_limit = y_train.min(), y_train.max()
-                y_pred = min(max(min_limit, y_pred), max_limit)
-                y_list.append([y_test,y_pred])
-            y_arr = np.array(y_list)
-            y_test = y_arr[:,0]; y_pred = y_arr[:,1]
-            from sklearn.metrics import r2_score
-            r2_score_value = r2_score(y_test,y_pred)
-            from sklearn.metrics import mean_squared_error
-            mse_score_value = mean_squared_error(y_test,y_pred)
-            date = dflst.date.iloc[index+bin_size*num_day]
-            y_true_pred = np.array([np.full(bin_size, file[:-4]).astype(str),np.full(bin_size, date).astype(str), y_test, y_pred.astype(np.float32)]).T
-            y_true_pred_list.append(y_true_pred)
-            r2_score_list.append([file[:-4],date,r2_score_value])
-            mse_score_list.append([file[:-4],date,mse_score_value])
 
-        y_true_pred_arr = np.array(y_true_pred_list).reshape(-1,4)
-        r2_score_arr = np.array(r2_score_list)
-        mse_score_arr = np.array(mse_score_list)
 
-        r2_score_arr_list.append(r2_score_arr)
-        mse_score_arr_list.append(mse_score_arr)
-        y_true_pred_arr_list.append(y_true_pred_arr)
+        pool = mr4mp.pool()
+        # results = pool.mapreduce(trial, combine, np.arange(0, dflst.shape[0] // bin_size - num_day))
+        results = pool.mapreduce(trial, combine, np.arange(0, dflst.shape[0] // bin_size - num_day),
+                                 [dflst] * np.arange(0, dflst.shape[0] // bin_size - num_day))
+        r2_score_list, mse_score_list, y_true_pred_list = results
+
         # mapreduce }
 
     r2_score_arr_arr = np.array(r2_score_arr_list).reshape(-1,3)

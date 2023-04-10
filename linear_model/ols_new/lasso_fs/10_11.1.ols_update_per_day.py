@@ -44,13 +44,14 @@ combined_array = np.array(list(zip(array1, array2))).flatten()
 
 
 # regulator = "Ridge"
-# regulator = "Lasso"
-regulator = "OLS"
+regulator = "Lasso"
+# regulator = "OLS"
 
 if __name__=="__main__":
     r2_score_arr_list = []
     mse_score_arr_list = []
     y_true_pred_arr_list = []
+    non_zero_cols_list = []
     for i in tqdm(range(len(onlyfiles))): # on mac4
         bin_size = 26
         num_day = 10
@@ -109,8 +110,7 @@ if __name__=="__main__":
                     return y_pred
                 elif regulator in ["Lasso","Ridge"]:
                     # print("LASSO / RIDGE")
-                    def find_best_regularity
-                        _alpha(X_train, y_train):
+                    def find_best_regularity_alpha(X_train, y_train):
                         if regulator == "Lasso":
                             from sklearn.linear_model import LassoCV
                             model = LassoCV(random_state=0, max_iter=10000000)
@@ -128,6 +128,14 @@ if __name__=="__main__":
                         from sklearn.linear_model import Ridge
                         reg = Ridge(alpha=best_regularity_alpha,max_iter=10000000, tol = 1e-2)
                     reg.fit(X_train, y_train)
+                    # get coefficients and corresponding column names
+                    coefficients = reg.coef_
+                    col_names = list(X_train.columns)
+                    # filter column names by non-zero coefficients
+                    non_zero_cols = [col_names[i] for i in range(len(coefficients)) if coefficients[i] != 0.0]
+                    # print non-zero column names
+                    # print(non_zero_cols)
+                    non_zero_cols_list.append(non_zero_cols)
                     y_pred = reg.predict(X_test)
                     return y_pred
                 else: raise NotImplementedError
@@ -168,18 +176,10 @@ if __name__=="__main__":
     r2_score_arr_df = pd.DataFrame(r2_score_arr_arr,columns=["symbol",'date','value'])
     mse_score_arr_df = pd.DataFrame(mse_score_arr_arr,columns=["symbol",'date','value'])
     y_true_pred_arr_df = pd.DataFrame(y_true_pred_arr_arr,columns=["symbol",'date','true','pred'])
+    x = []
+    non_zero_cols_arr = [x.extend(non_zero_cols) for non_zero_cols in non_zero_cols_list]
+    import collections
+    freq_dict = collections.Counter(x)
+    sorted_dict = dict(sorted(freq_dict.items(), key=lambda x: x[1], reverse=True))
+    sorted_dict.keys()
 
-    result_data_path = path + "05_result_data_path/"+regulator+"/"
-    try:listdir(result_data_path)
-    except:import os;os.mkdir(result_data_path)
-
-    r2_score_arr_df.to_csv(result_data_path + "r2_score.csv")
-    mse_score_arr_df.to_csv(result_data_path + "mse_score.csv")
-    y_true_pred_arr_df.to_csv(result_data_path + "y_true_pred.csv")
-
-
-
-    array1 = np.concatenate( [np.arange(1,10,0.01), np.arange(10,50,0.1) ])
-    array2 = np.arange(1,0.001,-0.001)
-    combined_array = np.array(list(zip(array1, array2))).flatten()
-    print(combined_array)
