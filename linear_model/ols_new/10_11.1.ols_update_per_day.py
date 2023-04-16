@@ -109,8 +109,7 @@ if __name__=="__main__":
                     return y_pred
                 elif regulator in ["Lasso","Ridge"]:
                     # print("LASSO / RIDGE")
-                    def find_best_regularity
-                        _alpha(X_train, y_train):
+                    def find_best_regularity_alpha(X_train, y_train):
                         if regulator == "Lasso":
                             from sklearn.linear_model import LassoCV
                             model = LassoCV(random_state=0, max_iter=10000000)
