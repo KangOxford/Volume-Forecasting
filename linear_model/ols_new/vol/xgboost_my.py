@@ -56,7 +56,7 @@ if __name__=="__main__":
     # Extract feature and target arrays
     X, y = data.drop('VO', axis=1), data[['VO']]
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
-    import xgboost as xgb
+    import xgboost_my as xgb
     # Create regression matrices
     dtrain_reg = xgb.DMatrix(X_train, y_train, enable_categorical=True)
     dtest_reg = xgb.DMatrix(X_test, y_test, enable_categorical=True)
