@@ -1,7 +1,10 @@
 # Time-Series-Forecasting
 Trading Target(Volume/Volatility) Time Series Prediction in LOB
 
-Forecasted Trading Volume is crutial in the VWAP replicating strategies and could be used in the [optimal execution](https://alphatrade.readthedocs.io/en/latest/future_research.html#future-research-topics), such as [Optimal Scheduling with Predicted Trading Volume](https://alphatrade.readthedocs.io/en/latest/future_research.html#future-research-topics)
+Forecasted Trading Volume is crutial in the VWAP replicating strategies and could be used in the [Optimal Execution](https://github.com/KangOxford/AlphaTrade), such as [Optimal Scheduling with Predicted Trading Volume](https://alphatrade.readthedocs.io/en/latest/future_research.html#future-research-topics)
+
+We have [environment](https://github.com/KangOxford/AlphaTrade) built in Jax which can automatically paralleling the env and train/testing our algorithm on thousands of stocks at the same time, with a speed up over 100 times.
+
 
 ![sketch](https://user-images.githubusercontent.com/37290277/221001866-667fb755-3dae-4319-9539-99c2197e0e2b.png)
 
