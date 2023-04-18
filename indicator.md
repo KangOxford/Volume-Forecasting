@@ -1,6 +1,6 @@
 | Type | Column Name | Description |
 | --- | --- | --- |
-| basic | symbol | Symbol of the instrument |
+| basic | symbol | Symbol of the Stock |
 | basic | date | Date of the observation |
 | basic | timeHMs | Start time of the interval in hours, minutes, and seconds |
 | basic | timeHMe | End time of the interval in hours, minutes, and seconds |
